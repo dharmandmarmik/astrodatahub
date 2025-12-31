@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %> - AstroDataHub Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    
+    <style>
+        .manage-container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .module-list { list-style: none; padding: 0; }
+        .module-item { 
+            background: white; 
+            padding: 15px 20px; 
+            margin-bottom: 15px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            border-left: 5px solid #2563eb; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .module-item h4 { margin: 0; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 10px; }
+        .module-actions { display: flex; align-items: center; gap: 12px; }
+        
+        /* Quiz Button UI */
+        .btn-quiz {
+            background-color: #8b5cf6 !important;
+            color: white !important;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 800;
+            display: inline-block;
+            border: 2px solid #7c3aed;
+            transition: all 0.2s ease;
+        }
+        .btn-quiz:hover {
+            background-color: #7c3aed !important;
+            transform: translateY(-2px);
+        }
+
+        /* View Quiz Variant (Green) */
+        .btn-quiz-saved {
+            background-color: #10b981 !important;
+            border-color: #059669 !important;
+        }
+        .btn-quiz-saved:hover {
+            background-color: #059669 !important;
+        }
+
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .badge-saved { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge-none { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+
+        .btn-secondary { background: #f1f5f9; color: #475569; padding: 8px 12px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+        .btn-delete { background: #fee2e2; color: #ef4444; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+        
+        .form-area { background: #f8fafc; padding: 25px; border-radius: 12px; margin-bottom: 30px; border: 2px dashed #cbd5e1; }
+        
+        input, .standard-textarea { 
+            width: 100%; 
+            padding: 12px; 
+            margin-top: 5px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-family: inherit;
+            font-size: 1rem;
+        }
+        .standard-textarea {
+            resize: vertical;
+            min-height: 200px;
+            border: 1px solid #cbd5e1;
+        }
+        label { font-weight: 700; font-size: 0.9rem; color: #475569; display: block; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>Admin: Modules for <%= course.title %></h1>
+        <nav>
+            <span class="welcome-message">Admin: <%= adminUser.username %></span>
+            <a href="/admin/manage-courses" class="btn-header">← Back to Courses</a>
+            <form action="/auth/logout" method="POST" style="display:inline;">
+                <button type="submit" class="btn-header btn-logout">Logout</button>
+            </form>
+        </nav>
+    </header>
+
+    <main class="manage-container">
+        <h2>Curriculum: **<%= course.title %>**</h2>
+
+        <% if (locals.error) { %>
+            <p class="error" style="color: red; padding: 10px; background: #fee2e2; border-radius: 5px;"><%= error %></p>
+        <% } %>
+        <% if (locals.success) { %>
+            <p class="success" style="color: green; padding: 10px; background: #dcfce7; border-radius: 5px;"><%= success %></p>
+        <% } %>
+
+        <div class="form-area">
+            <h3>Add New Module</h3>
+            <form action="/admin/create-module/<%= course.id %>" method="POST">
+                <div style="display: flex; gap: 20px;">
+                    <div style="flex: 1;">
+                        <label for="module_number">Order #</label>
+                        <% const nextNum = modules.length > 0 ? modules[modules.length - 1].module_order + 1 : 1; %>
+                        <input type="number" id="module_number" name="module_number" value="<%= nextNum %>" required>
+                    </div>
+                    <div style="flex: 3;">
+                        <label for="title">Module Title</label>
+                        <input type="text" id="title" name="title" placeholder="Enter lesson title..." required>
+                    </div>
+                </div>
+
+                <label for="video_url">Video URL</label>
+                <input type="url" id="video_url" name="video_url" placeholder="YouTube URL..." required>
+
+                <label for="description">Content Body (Standard Editor)</label>
+                <textarea id="description" name="description" class="standard-textarea" placeholder="Write your module content here..."></textarea>
+
+                <button type="submit" class="btn-primary" style="margin-top: 20px; background: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 700;">Deploy Module</button>
+            </form>
+        </div>
+
+        <h3>Existing Modules List (<%= modules.length %>)</h3>
+        <ul class="module-list">
+            <% if (modules && modules.length > 0) { %>
+                <% modules.forEach(module => { %>
+                    <li class="module-item">
+                        <div>
+                            <h4>
+                                M<%= module.module_order %>: <%= module.module_title %>
+                                <% if (module.hasQuiz) { %>
+                                    <span class="status-badge badge-saved">✅ Quiz Saved</span>
+                                <% } else { %>
+                                    <span class="status-badge badge-none">No Quiz</span>
+                                <% } %>
+                            </h4>
+                        </div>
+                        
+                        <div class="module-actions">
+    <% if (module.hasQuiz) { %>
+        <a href="/admin/quiz/edit/<%= module.quizId %>" class="btn-quiz btn-quiz-saved" style="background-color: #3b82f6 !important; border-color: #2563eb !important;">
+            ✏️ Edit Quiz
+        </a>
+    <% } else { %>
+        <a href="/admin/modules/<%= module.id %>/add-quiz" class="btn-quiz">
+            📝 Add Quiz
+        </a>
+    <% } %>
+
+    <a href="#" class="btn-secondary">Edit Module</a>
+    
+    <form action="/admin/delete-module/<%= course.id %>/<%= module.id %>" method="POST"
+          onsubmit="return confirm('Delete this module? All associated quiz data will be lost.');">
+        <button type="submit" class="btn-delete">Delete</button>
+    </form>
+</div>
+                    </li>
+                <% }) %>
+            <% } else { %>
+                <li style="text-align: center; color: #64748b; padding: 20px;">No modules detected in this sector.</li>
+            <% } %>
+        </ul>
+    </main>
+</body>
+</html>

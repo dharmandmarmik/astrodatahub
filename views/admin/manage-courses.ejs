@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %> - AstroDataHub</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        :root {
+            --accent: #2563eb;
+            --quiz-color: #8b5cf6;
+        }
+        .manage-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .action-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .course-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        .course-table th, .course-table td { padding: 15px; text-align: left; }
+        .course-table th { background-color: #f8fafc; color: #64748b; font-weight: 700; border-top: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+        .course-table td { background-color: white; border-bottom: 1px solid #e0e0e0; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); border-radius: 8px; }
+        .course-table tr:hover td { background-color: #f8f9fa; }
+        .tag { padding: 4px 10px; border-radius: 6px; font-size: 0.8em; font-weight: 700; }
+        .tag-physics { background-color: #e8f0fe; color: #1a73e8; }
+        .tag-chemistry { background-color: #e6fcf5; color: #16a085; }
+        .tag-math { background-color: #fff4e0; color: #f39c12; }
+        
+        .btn-manage-module { 
+            background-color: var(--accent); 
+            color: white; 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            text-decoration: none; 
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .btn-quiz-status {
+            background-color: #f5f3ff;
+            color: var(--quiz-color);
+            border: 1px solid #ddd6fe;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .btn-quiz-status:hover { background-color: #ddd6fe; }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>Admin: Course Management</h1>
+        <nav>
+            <span class="welcome-message">Admin: <%= adminUser.username %></span>
+            <a href="/admin/dashboard" class="btn-header">Dashboard</a>
+            <form action="/auth/logout" method="POST" style="display:inline;">
+                <button type="submit" class="btn-header btn-logout">Logout</button>
+            </form>
+        </nav>
+    </header>
+
+    <main class="manage-container">
+        <div class="action-header">
+            <div>
+                <h2>Course Overview</h2>
+                <p style="color: #64748b; margin: 0;">You have <%= courses.length %> curricula published.</p>
+            </div>
+            <a href="/admin/create-course" class="btn-header" style="background: var(--accent); color: white; border: none;">➕ Create New Course</a>
+        </div>
+        
+        <% if (locals.error) { %>
+            <p class="error" style="background: #fee2e2; color: #b91c1c; padding: 15px; border-radius: 8px;"><%= error %></p>
+        <% } %>
+        <% if (locals.success) { %>
+            <p class="success" style="background: #dcfce7; color: #15803d; padding: 15px; border-radius: 8px;"><%= success %></p>
+        <% } %>
+
+        <table class="course-table">
+            <thead>
+                <tr>
+                    <th>Course Title</th>
+                    <th>Subject Category</th>
+                    <th>Grade Level</th>
+                    <th>Structure & Quizzes</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (courses.length > 0) { %>
+                    <% courses.forEach(course => { %>
+                        <tr>
+                            <td style="font-weight: 700;"><%= course.title %></td>
+                            <td>
+                                <% let tagClass = '';
+                                if (course.subject === 'Physics') tagClass = 'tag-physics';
+                                else if (course.subject === 'Chemistry') tagClass = 'tag-chemistry';
+                                else if (course.subject === 'Math') tagClass = 'tag-math';
+                                %>
+                                <span class="tag <%= tagClass %>"><%= course.subject %></span>
+                            </td>
+                            <td><span style="color: #64748b;"><%= course.level %></span></td>
+                            <td>
+                                <a href="/admin/course/<%= course.id %>" class="btn-manage-module">📂 Manage Modules</a>
+                            </td>
+                            <td>
+                                <a href="/admin/edit-course/<%= course.id %>" style="color: var(--accent); font-weight: 600; text-decoration: none; margin-right: 15px;">Edit</a>
+                                <span style="color: #cbd5e1;">|</span>
+                                <a href="#" style="color: #ef4444; font-weight: 600; text-decoration: none; margin-left: 15px;">Archive</a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 50px; color: #64748b;">
+                            <p>No courses found in the database.</p>
+                            <a href="/admin/create-course" class="btn-header">Start Building</a>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

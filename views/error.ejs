@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title || 'Error' %> - AstroDataHub</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .error-container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 40px;
+            border: 1px solid #e74c3c;
+            border-left: 5px solid #e74c3c;
+            border-radius: 8px;
+            background-color: #fceceb;
+            text-align: center;
+        }
+        .error-container h2 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+        .error-container p {
+            color: #333;
+            font-size: 1.1em;
+        }
+        .error-container a {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h2>❌ <%= title || 'An Error Occurred' %></h2>
+        <p><%= message || 'Something went wrong on the server. Please try again or return to the homepage.' %></p>
+        
+        <a href="/">← Go to Homepage</a>
+    </div>
+</body>
+</html>

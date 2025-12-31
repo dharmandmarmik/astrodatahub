@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | AstroDataHub</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="background-color: var(--bg-body); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0;">
+
+    <div class="auth-card" style="width: 100%; max-width: 420px; border-radius: 16px;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h1 style="color: var(--primary); font-size: 1.5rem; margin-bottom: 0.5rem;">Join AstroDataHub</h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Create your credentials to start learning.</p>
+        </div>
+
+        <% if (locals.error) { %>
+            <div class="error-banner"><%= error %></div>
+        <% } %>
+
+        <form action="/auth/register" method="POST">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="username" placeholder="e.g. Alex North" required>
+            </div>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="alex@space-edu.com" required>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label>Create Access Key (Password)</label>
+                <input type="password" name="password" placeholder="Min. 8 characters" required>
+            </div>
+            
+            <button type="submit" class="btn-primary" style="width: 100%; padding: 14px;">Create My Account</button>
+        </form>
+
+        <div style="margin-top: 2rem; text-align: center; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+            <p style="font-size: 0.9rem; color: var(--text-muted);">
+                Already have an account? <a href="/auth/login" style="font-weight: 600;">Sign In Instead</a>
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>

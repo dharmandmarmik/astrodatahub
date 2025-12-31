@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | AstroDataHub</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="background-color: var(--bg-body); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0;">
+
+    <div class="auth-card" style="width: 100%; max-width: 420px; border-radius: 16px;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h1 style="color: var(--primary); font-size: 1.5rem; margin-bottom: 0.5rem;">AstroDataHub</h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Welcome back. Please sign in to your terminal.</p>
+        </div>
+
+        <% if (locals.error) { %>
+            <div class="error-banner" style="margin-bottom: 1.5rem; background: #fee2e2; color: #b91c1c; padding: 10px; border-radius: 8px; font-size: 0.85rem; text-align: center;">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <form action="/auth/login" method="POST">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Username</label>
+                <input type="text" name="username" placeholder="Enter your identity" required style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px;">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: 600;">
+                    Password
+                    <a href="#" style="font-weight: 400; font-size: 0.8rem; color: var(--primary);">Forgot access key?</a>
+                </label>
+                <input type="password" name="password" placeholder="••••••••" required style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px;">
+            </div>
+            
+            <button type="submit" class="btn-primary" style="width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Sign In to Dashboard</button>
+        </form>
+
+        <div style="margin: 2rem 0; text-align: center; position: relative;">
+            <hr style="border: 0; border-top: 1px solid var(--border);">
+            <span style="background: #fff; padding: 0 12px; font-size: 0.75rem; color: var(--text-muted); position: absolute; top: -10px; left: 50%; transform: translateX(-50%);">OR</span>
+        </div>
+
+        <a href="/auth/google" style="display: flex; align-items: center; justify-content: center; gap: 12px; text-decoration: none; color: #334155; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; background: white; transition: background 0.2s;">
+            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="20" alt="Google">
+            Continue with Google
+        </a>
+
+        <div style="margin-top: 2rem; text-align: center; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+            <p style="font-size: 0.9rem; color: var(--text-muted);">
+                New to the platform? <a href="/auth/register" style="font-weight: 600; color: var(--primary);">Register New Node</a>
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>

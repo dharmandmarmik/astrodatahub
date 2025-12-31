@@ -1,0 +1,64 @@
+<%- include('../partials/header') %>
+
+<main class="admin-container">
+    <div class="glass-card">
+        <h1>📡 Global Broadcast</h1>
+        <p class="subtitle">Transmit a message to every active user in the hub.</p>
+
+        <form action="/admin/broadcast" method="POST" class="broadcast-form">
+            <div class="form-group">
+                <label>Signal Type</label>
+                <select name="type" required>
+                    <option value="admin">System Announcement</option>
+                    <option value="security">Security Alert</option>
+                    <option value="progress">New Content/Mission</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Transmission Title</label>
+                <input type="text" name="title" placeholder="e.g., New Research Available" required>
+            </div>
+
+            <div class="form-group">
+                <label>Message Content</label>
+                <textarea name="message" rows="5" placeholder="Enter your global message here..." required></textarea>
+            </div>
+
+            <button type="submit" class="blast-btn">
+                <span>🚀 Initialize Broadcast</span>
+            </button>
+        </form>
+    </div>
+</main>
+
+<style>
+    .admin-container { padding: 4rem 2rem; max-width: 800px; margin: 0 auto; }
+    .glass-card { background: white; padding: 2.5rem; border-radius: 15px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+    h1 { color: #0f172a; margin-bottom: 0.5rem; }
+    .subtitle { color: #64748b; margin-bottom: 2rem; }
+    
+    .form-group { margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    label { font-weight: 600; font-size: 0.9rem; color: #1e293b; }
+    
+    input, select, textarea {
+        padding: 0.8rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-family: inherit;
+    }
+
+    .blast-btn {
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.2s;
+        width: 100%;
+    }
+
+    .blast-btn:hover { background: #1d4ed8; transform: translateY(-2px); }
+</style>

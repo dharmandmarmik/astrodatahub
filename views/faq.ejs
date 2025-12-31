@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AstroDataHub | Education for Every Stage</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --accent: #2563eb; 
+            --text-dark: #0f172a; 
+            --text-muted: #64748b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+        }
+        
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: #ffffff; color: var(--text-dark); scroll-behavior: smooth; }
+
+        /* Hero Section */
+        .hero { 
+            min-height: 85vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            text-align: center; 
+            background: radial-gradient(circle at 70% 30%, #eff6ff 0%, #ffffff 70%); 
+            padding: 0 10%; 
+        }
+        .hero h1 { font-size: clamp(2.5rem, 8vw, 4.2rem); line-height: 1.1; margin: 0; color: var(--text-dark); font-weight: 800; letter-spacing: -2px; }
+        .hero p { max-width: 800px; font-size: 1.25rem; color: var(--text-muted); margin: 30px 0; line-height: 1.6; }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 1000px;
+            margin: -60px auto 0;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .stat-item h2 { color: var(--accent); margin: 0; font-size: 2rem; font-weight: 800; }
+        .stat-item p { color: var(--text-muted); margin: 5px 0 0; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Section Global */
+        .section { padding: 100px 10%; border-top: 1px solid var(--border); }
+        .section-title { font-size: 2.5rem; text-align: center; margin-bottom: 20px; font-weight: 800; letter-spacing: -1px; }
+        .section-subtitle { text-align: center; color: var(--text-muted); margin-bottom: 60px; font-size: 1.1rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+        
+        /* Learning Path Grid */
+        .path-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+        .path-card { 
+            background: #ffffff; 
+            padding: 35px; 
+            border-radius: 24px; 
+            border: 1px solid var(--border); 
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .path-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.05); }
+        .level-tag { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; letter-spacing: 1px; }
+        .path-card h3 { margin: 0 0 15px 0; font-size: 1.4rem; font-weight: 700; }
+        .path-card p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; }
+        .path-card ul { padding: 0; list-style: none; margin-top: auto; }
+        .path-card li { font-size: 0.85rem; padding: 5px 0; border-top: 1px solid #f1f5f9; color: var(--text-dark); font-weight: 600; }
+
+        /* Call to Action */
+        .cta-section { 
+            background: var(--text-dark); 
+            color: white; 
+            text-align: center; 
+            padding: 80px 10%; 
+            border-radius: 40px; 
+            margin: 0 5% 80px;
+        }
+        .btn { padding: 16px 32px; border-radius: 12px; font-weight: 700; text-decoration: none; display: inline-block; transition: 0.3s; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-white { background: #fff; color: var(--text-dark); }
+
+        footer { padding: 80px 10%; border-top: 1px solid var(--border); background: var(--bg-light); text-align: center; }
+    </style>
+</head>
+<body>
+
+    <%- include('partials/header') %>
+
+    <header class="hero">
+        <h1>A Journey of Learning <br> from <span style="color:var(--accent)">Nursery to Research.</span></h1>
+        <p>A comprehensive educational ecosystem dedicated to the sciences. Whether you are a curious toddler, a high-school student, or a PhD researcher, we provide the tools to explore the intersection of astronomy, mathematics, and physics.</p>
+        <div style="display: flex; gap: 15px;">
+            <a href="/auth/register" class="btn btn-primary">Start Your Journey</a>
+            <a href="#paths" class="btn" style="color: var(--text-dark); border: 1px solid var(--border);">Browse Levels</a>
+        </div>
+    </header>
+
+    <div class="stats-bar">
+        <div class="stat-item">
+            <h2>K-20+</h2>
+            <p>Education Span</p>
+        </div>
+        <div class="stat-item">
+            <h2>150+</h2>
+            <p>Targeted Modules</p>
+        </div>
+        <div class="stat-item">
+            <h2>Open</h2>
+            <p>To All Backgrounds</p>
+        </div>
+        <div class="stat-item">
+            <h2>Global</h2>
+            <p>Learning Hub</p>
+        </div>
+    </div>
+
+    <section id="paths" class="section">
+        <h2 class="section-title">Academic Learning Tiers</h2>
+        <p class="section-subtitle">Curriculums designed specifically for every stage of human development and academic growth.</p>
+        
+        <div class="path-grid">
+            <div class="path-card">
+                <span class="level-tag">Nursery & Pre-School</span>
+                <h3>Stellar Foundations</h3>
+                <p>Nurturing curiosity in early learners through visual storytelling and basic recognition of cosmic shapes and colors.</p>
+                <ul>
+                    <li>🔭 Identifying the Moon & Sun</li>
+                    <li>🎨 Color-coded constellations</li>
+                    <li>🌍 Our Home Planet: Earth</li>
+                </ul>
+            </div>
+
+            <div class="path-card">
+                <span class="level-tag">Primary & High Schools</span>
+                <h3>The Student Scientist</h3>
+                <p>Building the core of Physics and Mathematics. We turn classroom theory into exciting celestial discovery.</p>
+                <ul>
+                    <li>📐 Arithmetic in Space</li>
+                    <li>⚡ Newton's Laws & Gravity</li>
+                    <li>🌌 Introduction to the Solar System</li>
+                </ul>
+            </div>
+
+            <div class="path-card">
+                <span class="level-tag">College & Undergrad</span>
+                <h3>Advanced Academia</h3>
+                <p>In-depth analysis for students pursuing degrees in Physics, Engineering, and Data Science.</p>
+                <ul>
+                    <li>⚛️ Quantum Mechanics Basics</li>
+                    <li>📈 Statistical Mathematics</li>
+                    <li>💻 Programming for Science</li>
+                </ul>
+            </div>
+
+            <div class="path-card">
+                <span class="level-tag">Graduate & Research</span>
+                <h3>Cosmological Innovation</h3>
+                <p>For Master's students, PhDs, and professionals pushing the boundaries of human knowledge with raw data.</p>
+                <ul>
+                    <li>🕳️ Black Hole Thermodynamics</li>
+                    <li>📊 Big Data Astrophysics</li>
+                    <li>🧪 Theoretical Particle Physics</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="domains" class="section" style="background: var(--bg-light);">
+        <h2 class="section-title">Interdisciplinary Domains</h2>
+        <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 40px;">
+            <div style="background: #fff; padding: 25px; border-radius: 15px; border: 1px solid var(--border);">
+                <h4 style="color:var(--accent)">Astronomy</h4>
+                <p style="font-size: 0.9rem; color: var(--text-muted)">From identifying planets (Nursery) to calculating Galaxy formation (Post-Grad).</p>
+            </div>
+            <div style="background: #fff; padding: 25px; border-radius: 15px; border: 1px solid var(--border);">
+                <h4 style="color:var(--accent)">Physics</h4>
+                <p style="font-size: 0.9rem; color: var(--text-muted)">From simple magnets (Primary) to Quantum Field Theory (Researchers).</p>
+            </div>
+            <div style="background: #fff; padding: 25px; border-radius: 15px; border: 1px solid var(--border);">
+                <h4 style="color:var(--accent)">Mathematics</h4>
+                <p style="font-size: 0.9rem; color: var(--text-muted)">From basic shapes to Complex Analysis and Topology.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="cta-section">
+        <h2>Start Your Education Mission</h2>
+        <p>AstroDataHub is committed to nurturing curiosity at every age. Join 12,000+ students and professionals today.</p>
+        <a href="/auth/register" class="btn btn-white">Create Account</a>
+    </div>
+
+    <footer>
+        <h2 style="font-weight: 800; margin: 0;"><span style="color:var(--accent)">ASTRO</span>DATAHUB</h2>
+        <p style="color: var(--text-muted); max-width: 500px; margin: 20px auto;">
+            Empowering learners from primary school to professional research through open data and scientific collaboration.
+        </p>
+        <nav style="margin: 30px 0;">
+            <ul style="list-style: none; padding: 0; display: flex; gap: 30px; justify-content: center;">
+                <li><a href="/courses" style="text-decoration: none; color: var(--text-dark); font-weight: 600;">Catalog</a></li>
+                <li><a href="/faq" style="text-decoration: none; color: var(--text-dark); font-weight: 600;">FAQ</a></li>
+                <li><a href="/support" style="text-decoration: none; color: var(--text-dark); font-weight: 600;">Support</a></li>
+            </ul>
+        </nav>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">&copy; 2025 AstroDataHub Sector. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

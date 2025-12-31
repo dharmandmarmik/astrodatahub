@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | AstroDataHub</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="background-color: var(--bg-body);">
+
+    <%- include('../partials/header') %>
+
+    <main class="container" style="padding-top: 3rem; padding-bottom: 5rem; max-width: 900px;">
+        
+        <nav style="margin-bottom: 2rem;">
+            <a href="/courses/course/<%= courseId %>" style="text-decoration: none; color: var(--primary); font-weight: 600; font-size: 0.9rem;">
+                &larr; Return to Syllabus
+            </a>
+        </nav>
+
+        <div class="auth-card" style="padding: 3rem; margin-bottom: 3rem;">
+            <header style="margin-bottom: 2.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem;">
+                <span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                    <%= courseTitle %>
+                </span>
+                <h1 style="font-size: 2.25rem; margin-top: 0.5rem;"><%= module.module_title %></h1>
+            </header>
+
+            <div class="module-body" style="line-height: 1.8; font-size: 1.1rem; color: #334155;">
+                <%- module.module_content %>
+            </div>
+
+            <% if (typeof quiz !== 'undefined' && quiz) { %>
+                <div style="margin-top: 4rem; padding: 2.5rem; background: #f8fafc; border: 2px dashed #e2e8f0; border-radius: 20px; text-align: center;">
+                    <div style="background: var(--primary); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-weight: bold; font-size: 1.2rem;">?</div>
+                    <h3 style="margin-bottom: 0.5rem; color: #1e293b;">Knowledge Check Available</h3>
+                    <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem;">Test your data synchronization and research comprehension for this module.</p>
+                    <a href="/courses/quiz/<%= quiz.id %>" class="btn-primary" style="display: inline-block; text-decoration: none; padding: 12px 32px; background: #4f46e5; width: auto;">
+                        Launch Module Quiz &rarr;
+                    </a>
+                </div>
+            <% } %>
+            <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                
+                <div>
+                    <% if (prevModuleId) { %>
+                        <a href="/courses/course/<%= courseId %>/module/<%= prevModuleId %>" class="btn-secondary" style="text-decoration: none; padding: 12px 24px; font-weight: 600;">
+                            &larr; Previous Unit
+                        </a>
+                    <% } %>
+                </div>
+
+                <div>
+                    <% if (nextModuleId) { %>
+                        <form action="/courses/course/<%= courseId %>/module/<%= module.id %>/complete" method="POST">
+                            <button type="submit" class="btn-primary" style="width: auto; padding: 12px 30px; font-weight: 600;">
+                                Complete & Next &rarr;
+                            </button>
+                        </form>
+                    <% } else { %>
+                        <form action="/courses/course/<%= courseId %>/module/<%= module.id %>/complete" method="POST">
+                            <button type="submit" class="btn-primary" style="background: #059669; width: auto; padding: 12px 30px; font-weight: 600;">
+                                Finish Mission
+                            </button>
+                        </form>
+                    <% } %>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+</body>
+</html>

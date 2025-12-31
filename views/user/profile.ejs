@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | AstroDataHub</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #f8fafc; 
+            color: #1e293b; 
+            font-family: 'Inter', sans-serif;
+        }
+
+        .profile-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 4rem 0 2rem;
+            text-align: center;
+        }
+
+        .avatar-main {
+            width: 100px;
+            height: 100px;
+            background: #2563eb;
+            color: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
+        }
+
+        .profile-container {
+            max-width: 900px;
+            margin: -2rem auto 4rem;
+            padding: 0 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: #0f172a; display: block; }
+        .stat-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .badge-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .badge-item {
+            background: #f8fafc;
+            border: 1px solid #f1f5f9;
+            padding: 1.5rem 1rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .badge-item:hover { transform: translateY(-5px); }
+        .badge-icon { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+        .badge-name { font-weight: 600; font-size: 0.9rem; color: #1e293b; display: block; }
+        .badge-subject { font-size: 0.7rem; color: #64748b; }
+
+        .xp-progress {
+            background: #f1f5f9;
+            height: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .xp-bar { height: 100%; background: #2563eb; transition: width 0.5s ease-out; }
+
+        @media (max-width: 640px) {
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <%- include('../partials/header') %>
+
+    <header class="profile-header">
+        <div class="avatar-main">
+            <%= profileUser.username.charAt(0).toUpperCase() %>
+        </div>
+        <h1 style="margin: 0; font-size: 2rem;"><%= profileUser.username %></h1>
+        <p style="color: #64748b; margin: 0.5rem 0 1.5rem;">Level <%= profileUser.level %> Explorer</p>
+        
+        <div style="max-width: 300px; margin: 0 auto;">
+            <div class="xp-progress">
+                <div class="xp-bar" style="width: <%= (profileUser.xp % 1000) / 10 %>%;"></div>
+            </div>
+            <p style="font-size: 0.75rem; margin-top: 5px; color: #64748b;"><%= profileUser.xp %> Total XP</p>
+        </div>
+    </header>
+
+    <main class="profile-container">
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-value"><%= profileUser.level %></span>
+                <span class="stat-label">Current Rank</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value"><%= badges.length %></span>
+                <span class="stat-label">Badges Earned</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value"><%= new Date(profileUser.created_at).toLocaleDateString() %></span>
+                <span class="stat-label">Enlisted Since</span>
+            </div>
+        </div>
+
+        <div class="badge-container">
+            <h2 style="margin: 0; font-size: 1.25rem;">🏅 Mastery Badges</h2>
+            
+            <% if (badges && badges.length > 0) { %>
+                <div class="badge-grid">
+                    <% badges.forEach(badge => { %>
+                        <div class="badge-item">
+                            <span class="badge-icon">🌟</span>
+                            <span class="badge-name"><%= badge.title %></span>
+                            <span class="badge-subject"><%= badge.subject %></span>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <div style="text-align: center; padding: 3rem 0; color: #64748b;">
+                    <p>No badges earned yet. Completing course quizzes will unlock badges here!</p>
+                </div>
+            <% } %>
+        </div>
+
+    </main>
+
+    <%- include('../partials/footer') %>
+
+</body>
+</html>

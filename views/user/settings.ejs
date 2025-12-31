@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | AstroDataHub</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #f8fafc; 
+            color: #1e293b; 
+            font-family: 'Inter', sans-serif;
+        }
+
+        .settings-container {
+            max-width: 1100px;
+            margin: 3rem auto;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            padding: 0 20px;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar-nav {
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+        }
+
+        .nav-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #64748b;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        /* Content Cards */
+        .white-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #0f172a;
+        }
+
+        /* Form Styling */
+        .form-group { margin-bottom: 1.25rem; }
+        
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        input {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #1e293b;
+            font-size: 0.95rem;
+        }
+
+        input:focus {
+            border-color: #2563eb;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-save {
+            background: #0f172a;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-save:hover { opacity: 0.9; }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+        .alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+        .alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+        @media (max-width: 768px) {
+            .settings-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <%- include('../partials/header') %>
+
+    <main class="settings-container">
+        
+        <aside class="sidebar-nav">
+            <div class="nav-card">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9;">
+                    <div style="width: 40px; height: 40px; background: #2563eb; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                        <%= user.username.charAt(0).toUpperCase() %>
+                    </div>
+                    <div>
+                        <h4 style="margin:0; font-size: 0.9rem;"><%= user.username %></h4>
+                        <a href="/@<%= user.username %>" style="font-size: 0.75rem; color: #2563eb; text-decoration: none;">View Public Profile</a>
+                    </div>
+                </div>
+                
+                <nav>
+                    <a href="#account" class="nav-link active">⚙️ Account Info</a>
+                    <a href="#security" class="nav-link">🔒 Security</a>
+                    <a href="/user/dashboard" class="nav-link">📊 Learning Dashboard</a>
+                </nav>
+            </div>
+        </aside>
+
+        <section>
+            
+            <% if (success) { %>
+                <div class="alert alert-success">✅ <%= success %></div>
+            <% } %>
+            <% if (error) { %>
+                <div class="alert alert-error">❌ <%= error %></div>
+            <% } %>
+
+            <div id="account" class="white-card">
+                <h2 class="section-title">Account Details</h2>
+                <form action="/user/settings/update" method="POST">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" name="username" value="<%= user.username %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" name="email" value="<%= user.email %>" required>
+                    </div>
+                    <button type="submit" class="btn-save">Update Settings</button>
+                </form>
+            </div>
+
+            <div id="security" class="white-card">
+                <h2 class="section-title">Change Password</h2>
+                <form action="/user/settings/password" method="POST">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" name="current_password" placeholder="••••••••" required>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" name="new_password" placeholder="Min. 6 chars" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" name="confirm_password" placeholder="Confirm" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-save" style="background: #e11d48;">Update Password</button>
+                </form>
+            </div>
+
+        </section>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+</body>
+</html>

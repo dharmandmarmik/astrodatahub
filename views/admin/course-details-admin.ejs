@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %> - AstroDataHub</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1>Admin: Module Management</h1>
+        <nav>
+            <span class="welcome-message">Admin: <%= adminUser.username %></span>
+            <a href="/admin/manage-courses" class="btn-header">← Manage Courses</a>
+            <form action="/auth/logout" method="POST" style="display:inline;">
+                <button type="submit" class="btn-header btn-logout">Logout</button>
+            </form>
+        </nav>
+    </header>
+
+    <main class="container" style="max-width: 800px; margin-top: 40px;">
+        <h2><%= title %></h2>
+        <p class="subtitle">Course ID: <%= course.id %> | Instructor ID: <%= course.instructor_id %></p>
+        
+        <% if (error) { %>
+            <p class="error"><%= error %></p>
+        <% } %>
+        <% if (success) { %>
+            <p class="success"><%= success %></p>
+        <% } %>
+
+        <a href="/admin/course/<%= course.id %>/module/create" class="btn-primary" style="margin-bottom: 20px;">
+            ➕ Add New Module
+        </a>
+
+        <h3>Module List (<%= modules.length %>)</h3>
+
+        <% if (modules.length === 0) { %>
+            <p style="padding: 15px; border: 1px dashed #ccc; text-align: center;">No modules have been created for this course yet.</p>
+        <% } else { %>
+            <div class="module-list" style="border: 1px solid #ddd; border-radius: 8px;">
+                <% modules.forEach(module => { %>
+                    <div class="module-item" style="padding: 15px; border-bottom: 1px solid #eee;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: bold;">[Order <%= module.module_order %>] <%= module.module_title %></span>
+                            <a href="/admin/course/module/edit/<%= module.id %>" class="btn-secondary" style="font-size: 0.9em; padding: 5px 10px;">Edit Content</a>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+        
+    </main>
+</body>
+</html>

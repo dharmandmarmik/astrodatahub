@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create New Course - AstroDataHub</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        .form-container { max-width: 600px; margin: 40px auto; padding: 30px; }
+        .editor-container { margin-bottom: 20px; }
+        #courseDescriptionEditor {
+            height: 250px;
+            background: white;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>Admin: Create Course</h1>
+        <nav>
+            <span class="welcome-message">Admin: <%= adminUser.username %></span>
+            <a href="/admin/manage-courses" class="btn-header">← Manage Courses</a>
+            <form action="/auth/logout" method="POST" style="display:inline;">
+                <button type="submit" class="btn-header btn-logout">Logout</button>
+            </form>
+        </nav>
+    </header>
+
+    <main class="form-container container">
+        <h2>Publish New Course</h2>
+        
+        <% if (error) { %>
+            <p class="error"><%= error %></p>
+        <% } %>
+
+        <form action="/admin/create-course" method="POST" id="courseForm">
+            
+            <input type="text" name="title" placeholder="Course Title (e.g., Quantum Mechanics I)" required>
+            
+            <select name="subject" required>
+                <option value="">Select Subject</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Astronomy">Astronomy</option>
+                <option value="Physics">Physics</option>
+                <option value="Chemistry">Chemistry</option>
+                <option value="Computer Science">Computer Science</option>
+            </select>
+
+            <select name="standard" required>
+                <option value="">Select Academic Path (Standard)</option>
+                <optgroup label="Schooling">
+                    <% for(let i=1; i<=12; i++) { %>
+                        <option value="Class <%= i %>">Class <%= i %></option>
+                    <% } %>
+                </optgroup>
+                <optgroup label="Higher Ed">
+                    <option value="Bachelors">Undergraduate (Bachelors)</option>
+                    <option value="Masters">Post-Graduate (Masters)</option>
+                    <option value="PhD / Doctorate">PhD / Doctorate</option>
+                </optgroup>
+                <optgroup label="Specialized">
+                    <option value="Research">Research & Thesis</option>
+                </optgroup>
+            </select>
+            
+            <select name="level" required>
+                <option value="">Select Difficulty</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Expert">Expert</option>
+            </select>
+            
+            <input type="hidden" name="description" id="courseDescriptionInput">
+
+            <label for="editor">Detailed Course Description</label>
+            <div id="courseDescriptionEditor" class="editor-container"></div>
+            
+            <div class="form-actions">
+                <a href="/admin/manage-courses" class="btn-back">Cancel</a>
+                <button type="submit" class="btn-primary" style="width: auto;">🚀 Create & Publish Course</button>
+            </div>
+        </form>
+    </main>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        var quill = new Quill('#courseDescriptionEditor', {
+            theme: 'snow',
+            placeholder: 'Start writing the course description...',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['link', 'blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ]
+            }
+        });
+
+        document.getElementById('courseForm').onsubmit = function() {
+            var html = quill.root.innerHTML;
+            document.getElementById('courseDescriptionInput').value = html;
+            return true; 
+        };
+    </script>
+</body>
+</html>

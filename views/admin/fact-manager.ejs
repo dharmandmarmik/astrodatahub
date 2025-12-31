@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Daily Discovery | Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+</head>
+<body style="background: #f1f5f9; font-family: 'Plus Jakarta Sans', sans-serif;">
+
+    <div style="max-width: 600px; margin: 80px auto; padding: 0 20px;">
+        <a href="/admin/dashboard" style="text-decoration: none; color: var(--accent); font-weight: 700; font-size: 0.9rem;">← Back to Admin Panel</a>
+        
+        <div style="background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-top: 20px;">
+            <h1 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 10px;">Daily Discovery</h1>
+            <p style="color: #64748b; margin-bottom: 30px;">This fact will appear on all student dashboards (Nursery to Research).</p>
+
+            <form action="/admin/update-fact" method="POST">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 700; margin-bottom: 8px; font-size: 0.9rem;">The Daily Fun Fact</label>
+                    <textarea 
+                        name="factText" 
+                        rows="5" 
+                        required
+                        placeholder="e.g., A teaspoon of a neutron star would weigh 6 billion tons!"
+                        style="width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; font-family: inherit; font-size: 1rem; line-height: 1.5;"
+                    ></textarea>
+                </div>
+
+                <button type="submit" class="btn-primary" style="width: 100%; height: 56px; border-radius: 50px; cursor: pointer; border: none; font-size: 1rem;">
+                    Update Dashboard Fact
+                </button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

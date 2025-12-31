@@ -1,0 +1,255 @@
+<header class="app-header">
+    <div class="header-container">
+        <a href="/" class="logo">
+            <span class="logo-accent">ASTRO</span>DATAHUB
+        </a>
+
+        <input type="checkbox" id="nav-toggle" class="nav-toggle">
+        <label for="nav-toggle" class="nav-toggle-label">
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </label>
+
+        <nav class="nav-links">
+            <div class="nav-group-main">
+                <% if (user) { %>
+                    <a href="/dashboard">Dashboard</a>
+                    <% if (user.role === 'admin') { %>
+                        <a href="/admin/dashboard" class="admin-badge">Admin Panel</a>
+                    <% } %>
+                <% } %>
+                <a href="/courses">Courses</a>
+                <% if (user) { %>
+                    <a href="/@<%= user.username %>">Profile</a>
+                <% } %>
+            </div>
+
+            <div class="nav-group-utility">
+                <% if (user) { %>
+                    <div class="notif-wrapper">
+                        <button id="notif-btn" class="notif-trigger">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                            <span id="notif-badge" class="badge hidden"></span>
+                        </button>
+                        
+                        <div id="notif-dropdown" class="notif-dropdown hidden">
+                            <div class="notif-header">
+                                <span>TRANSMISSIONS</span>
+                                <button id="clear-notifs" class="clear-all">Clear All</button>
+                            </div>
+                            <div id="notif-list" class="notif-content">
+                                <div class="empty-state">No active signals...</div>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+                
+                <div class="auth-group">
+                    <% if (user) { %>
+                        <div class="user-pill">
+                            <div class="user-meta">
+                                <span class="user-info">Hi, <strong><%= user.username %></strong></span>
+                                <a href="/user/settings" class="settings-link">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="settings-icon"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                    Settings
+                                </a>
+                            </div>
+                            <form action="/auth/logout" method="POST" style="display:inline;">
+                                <button type="submit" class="logout-btn">Logout</button>
+                            </form>
+                        </div>
+                    <% } else { %>
+                        <a href="/auth/login" class="login-link">Sign In</a>
+                        <a href="/auth/register" class="join-btn">Join</a>
+                    <% } %>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+        --notif-bg: #ffffff;
+    }
+
+    .app-header {
+        background: #ffffff;
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 2000;
+        padding: 0.75rem 0;
+        height: 70px;
+        display: flex;
+        align-items: center;
+    }
+
+    .header-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .logo { text-decoration: none; font-weight: 800; font-size: 1.25rem; color: var(--text-main); z-index: 2001; }
+    .logo-accent { color: var(--primary); }
+
+    .nav-links { display: flex; align-items: center; justify-content: space-between; flex: 1; margin-left: 3rem; }
+    .nav-group-main { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-group-utility { display: flex; align-items: center; gap: 1.5rem; }
+
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--primary); }
+
+    .admin-badge { background: #fef2f2; color: #ef4444 !important; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem !important; }
+
+    .notif-wrapper { position: relative; display: flex; align-items: center; }
+    .notif-trigger { background: none; border: none; color: var(--text-muted); cursor: pointer; position: relative; padding: 8px; border-radius: 8px; transition: 0.2s; }
+    .notif-trigger:hover { background: #f1f5f9; color: var(--primary); }
+    
+    .badge { position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; background: #ef4444; border-radius: 50%; border: 2px solid white; }
+
+    .notif-dropdown {
+        position: absolute; top: 100%; right: 0; width: 320px; background: var(--notif-bg);
+        border: 1px solid var(--border); border-radius: 12px;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15); margin-top: 10px; overflow: hidden;
+        z-index: 9999;
+        opacity: 0; visibility: hidden; transform: translateY(10px);
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    .notif-wrapper:hover .notif-dropdown {
+        opacity: 1; visibility: visible; transform: translateY(0);
+    }
+
+    .notif-header { padding: 12px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); background: #f8fafc; letter-spacing: 0.05em; }
+    .clear-all { background: none; border: none; color: var(--primary); cursor: pointer; font-weight: 700; font-size: 0.7rem; }
+
+    .notif-content { max-height: 400px; overflow-y: auto; background: #fff; }
+    .notif-item { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 4px; transition: background 0.2s; }
+    .notif-item:hover { background: #f8fafc; }
+    .notif-item.unread { background: #eff6ff; border-left: 3px solid var(--primary); }
+    
+    .notif-title { display: block; font-size: 0.85rem; font-weight: 700; color: #1e293b; }
+    .notif-msg { display: block; font-size: 0.8rem; color: #475569; line-height: 1.4; white-space: pre-wrap; }
+    .notif-time { font-size: 0.7rem; color: #94a3b8; margin-top: 4px; }
+    .empty-state { padding: 30px; text-align: center; color: var(--text-muted); font-size: 0.85rem; }
+
+    .auth-group { display: flex; align-items: center; gap: 1rem; border-left: 1px solid var(--border); padding-left: 1.5rem; }
+    .user-pill { display: flex; align-items: center; gap: 1rem; }
+    .user-meta { display: flex; flex-direction: column; line-height: 1.2; }
+    .user-info { font-size: 0.85rem; color: var(--text-main); }
+    
+    /* Refined Settings Link with Icon */
+    .settings-link { 
+        font-size: 0.7rem !important; 
+        color: var(--primary) !important; 
+        font-weight: 700 !important; 
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        margin-top: 2px;
+    }
+    .settings-icon { transition: transform 0.5s ease; }
+    .settings-link:hover .settings-icon { transform: rotate(90deg); }
+    
+    .logout-btn { background: none; border: 1px solid #fee2e2; color: #ef4444; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 700; transition: 0.2s; }
+    .logout-btn:hover { background: #fef2f2; }
+    .join-btn { background: var(--primary); color: white !important; padding: 8px 18px; border-radius: 6px; font-weight: 700 !important; }
+
+    .nav-toggle { display: none; }
+    .nav-toggle-label { display: none; cursor: pointer; padding: 10px; z-index: 2005; }
+    .hamburger { width: 24px; height: 18px; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+    .hamburger span { display: block; height: 2px; width: 100%; background: var(--text-main); border-radius: 2px; transition: 0.3s; }
+
+    #nav-toggle:checked + .nav-toggle-label .hamburger span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    #nav-toggle:checked + .nav-toggle-label .hamburger span:nth-child(2) { opacity: 0; }
+    #nav-toggle:checked + .nav-toggle-label .hamburger span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    @media (max-width: 900px) {
+        .nav-toggle-label { display: block; }
+        .nav-links { 
+            position: fixed; background: white; top: 0; right: 0; bottom: 0; width: 280px; 
+            flex-direction: column; padding: 6rem 1.5rem; transform: translateX(100%); 
+            transition: transform 0.3s ease-in-out; box-shadow: -10px 0 30px rgba(0,0,0,0.1); 
+            align-items: flex-start; justify-content: flex-start; gap: 2rem;
+        }
+        .nav-group-main, .nav-group-utility, .auth-group, .user-pill { flex-direction: column; align-items: flex-start; width: 100%; gap: 1.5rem; }
+        .auth-group { border-left: none; padding-left: 0; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+        .nav-toggle:checked ~ .nav-links { transform: translateX(0); }
+        .notif-dropdown { position: fixed; top: 70px; right: 5%; left: 5%; width: 90%; opacity: 1; visibility: visible; display: none; }
+        .notif-dropdown:not(.hidden) { display: block; } 
+    }
+</style>
+
+<script>
+    /* Javascript logic remains unchanged as per your working version */
+    const notifBtn = document.getElementById('notif-btn');
+    const notifDropdown = document.getElementById('notif-dropdown');
+    const notifBadge = document.getElementById('notif-badge');
+    const notifList = document.getElementById('notif-list');
+    const clearBtn = document.getElementById('clear-notifs');
+
+    if(clearBtn) {
+        clearBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if(confirm("Permanently clear all transmissions?")) {
+                await fetch('/api/notifications/clear', { method: 'DELETE' });
+                fetchNotifications();
+            }
+        });
+    }
+
+    if(notifBtn) {
+        notifBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const isOpening = notifDropdown.classList.contains('hidden');
+            notifDropdown.classList.toggle('hidden');
+            if (isOpening) {
+                await fetch('/api/notifications/mark-read', { method: 'POST' });
+                notifBadge.classList.add('hidden');
+            }
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if(notifDropdown && notifBtn && !notifBtn.contains(e.target)) {
+            notifDropdown.classList.add('hidden');
+        }
+    });
+
+    async function fetchNotifications() {
+        try {
+            const response = await fetch('/api/notifications');
+            const notifications = await response.json();
+            if (notifications.length > 0) {
+                const hasUnread = notifications.some(n => n.is_read === 0);
+                if (hasUnread) notifBadge.classList.remove('hidden');
+                notifList.innerHTML = notifications.map(n => `
+                    <div class="notif-item ${n.is_read ? '' : 'unread'}">
+                        <span class="notif-title">${n.title}</span>
+                        <span class="notif-msg">${n.message}</span>
+                        <span class="notif-time">${new Date(n.created_at).toLocaleString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })}</span>
+                    </div>
+                `).join('');
+            } else {
+                notifBadge.classList.add('hidden');
+                notifList.innerHTML = '<div class="empty-state">No active signals found.</div>';
+            }
+        } catch (err) { console.error('Signal Error:', err); }
+    }
+
+    if(notifBtn) fetchNotifications();
+    setInterval(fetchNotifications, 60000);
+</script>
