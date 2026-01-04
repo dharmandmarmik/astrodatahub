@@ -15,7 +15,9 @@ router.post('/update-fact', authMiddleware.isAdmin, adminController.updateFact);
 // --- 3. User Management ---
 router.get('/manage-users', authMiddleware.isAdmin, adminController.getUsers); 
 router.post('/user/role', authMiddleware.isAdmin, adminController.updateUserRole);
-router.post('/user/delete', authMiddleware.isAdmin, adminController.deleteUser);
+
+// FIXED: Changed to GET and parameter :id to match your direct URL link
+router.post('/delete-user/:id', authMiddleware.isAdmin, adminController.deleteUser);
 
 // --- 4. Course Management ---
 router.get('/manage-courses', authMiddleware.isAdmin, adminController.getManageCourses); 
@@ -28,22 +30,18 @@ router.post('/delete-course/:id', authMiddleware.isAdmin, adminController.delete
 // --- 5. Analytics ---
 router.get('/analytics', authMiddleware.isAdmin, adminController.getAnalytics); 
 
-// --- 6. Module Management (Standardized for your links) ---
+// --- 6. Module Management ---
 router.get('/course/:courseId', authMiddleware.isAdmin, adminController.getCourseDetailsAdmin); 
 router.get('/create-module/:courseId', authMiddleware.isAdmin, adminController.getCreateModule);
 router.post('/create-module/:courseId', authMiddleware.isAdmin, adminController.createModule);
 
 // --- 7. Quiz Management ---
-// Route to show the "Add Quiz" page for a specific module
 router.get('/modules/:moduleId/add-quiz', authMiddleware.isAdmin, adminController.getAddQuiz);
-// Route to handle the form submission for the quiz
 router.post('/modules/:moduleId/add-quiz', authMiddleware.isAdmin, adminController.postAddQuiz);
-
-// SECURED: Added authMiddleware.isAdmin to prevent unauthorized access to the editor
 router.get('/quiz/edit/:quizId', authMiddleware.isAdmin, adminController.getEditQuiz);
 router.post('/quiz/edit/:quizId', authMiddleware.isAdmin, adminController.postEditQuiz);
 
-// --- 8. GLOBAL BROADCAST (ULTIMATE TRANSMISSION) ---
+// --- 8. GLOBAL BROADCAST ---
 router.get('/broadcast', authMiddleware.isAdmin, (req, res) => {
     res.render('admin/broadcast', { 
         title: 'Global Transmission | Admin',

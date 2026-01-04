@@ -70,70 +70,73 @@ function all(sql, params = []) {
  * Safe Migration Logic: Adds missing columns to existing databases
  */
 function applySafeMigrations() {
-    // 1. Check User Table columns
+    // 1. Check User Table columns (UPDATED FOR STEP 2)
     db.all("PRAGMA table_info(Users)", (err, columns) => {
         if (err) return;
         const columnNames = columns.map(c => c.name);
         db.serialize(() => {
-            if (!columnNames.includes('streak_count')) {
-                db.run("ALTER TABLE Users ADD COLUMN streak_count INTEGER DEFAULT 0");
-            }
-            if (!columnNames.includes('last_activity_date')) {
-                db.run("ALTER TABLE Users ADD COLUMN last_activity_date DATETIME DEFAULT '2025-01-01 00:00:00'");
-            }
-            if (!columnNames.includes('role')) {
-                db.run("ALTER TABLE Users ADD COLUMN role TEXT DEFAULT 'user'");
-            }
-            if (!columnNames.includes('level')) {
-                db.run("ALTER TABLE Users ADD COLUMN level INTEGER DEFAULT 1");
-            }
-            if (!columnNames.includes('xp')) {
-                db.run("ALTER TABLE Users ADD COLUMN xp INTEGER DEFAULT 0");
+            if (!columnNames.includes('otp_code')) db.run("ALTER TABLE Users ADD COLUMN otp_code TEXT");
+            if (!columnNames.includes('otp_expires')) db.run("ALTER TABLE Users ADD COLUMN otp_expires TEXT");
+            if (!columnNames.includes('is_verified')) db.run("ALTER TABLE Users ADD COLUMN is_verified INTEGER DEFAULT 0");
+            if (!columnNames.includes('streak_count')) db.run("ALTER TABLE Users ADD COLUMN streak_count INTEGER DEFAULT 0");
+            if (!columnNames.includes('last_activity_date')) db.run("ALTER TABLE Users ADD COLUMN last_activity_date DATETIME DEFAULT '2025-01-01 00:00:00'");
+            if (!columnNames.includes('role')) db.run("ALTER TABLE Users ADD COLUMN role TEXT DEFAULT 'user'");
+            if (!columnNames.includes('level')) db.run("ALTER TABLE Users ADD COLUMN level INTEGER DEFAULT 1");
+            if (!columnNames.includes('xp')) db.run("ALTER TABLE Users ADD COLUMN xp INTEGER DEFAULT 0");
+            
+            // LOGIC FOR STEP 2: Handle country choice and global toggle
+            if (!columnNames.includes('country')) db.run("ALTER TABLE Users ADD COLUMN country TEXT"); 
+            if (!columnNames.includes('view_global_always')) db.run("ALTER TABLE Users ADD COLUMN view_global_always INTEGER DEFAULT 0");
+        });
+    });
+
+    // 2. Courses Table Migration
+    db.all("PRAGMA table_info(Courses)", (err, columns) => {
+        if (err) return;
+        const columnNames = columns.map(c => c.name);
+        db.serialize(() => {
+            if (!columnNames.includes('standard')) db.run("ALTER TABLE Courses ADD COLUMN standard TEXT");
+            if (!columnNames.includes('badge_icon')) db.run("ALTER TABLE Courses ADD COLUMN badge_icon TEXT DEFAULT '🌟'");
+            if (!columnNames.includes('price_inr')) db.run("ALTER TABLE Courses ADD COLUMN price_inr INTEGER DEFAULT 0");
+            if (!columnNames.includes('price_usd')) db.run("ALTER TABLE Courses ADD COLUMN price_usd INTEGER DEFAULT 0");
+            if (!columnNames.includes('country_code')) {
+                db.run("ALTER TABLE Courses ADD COLUMN country_code TEXT DEFAULT 'GLOBAL'");
             }
         });
     });
 
-    // 2. Check Courses Table columns
-    db.all("PRAGMA table_info(Courses)", (err, columns) => {
-        if (err) return;
-        const columnNames = columns.map(c => c.name);
-        if (!columnNames.includes('standard')) {
-            db.run("ALTER TABLE Courses ADD COLUMN standard TEXT");
-        }
-    });
-
-    // 3. Migration for Questions Table (Handling dynamic options)
+    // 3. Questions Table Migration
     db.all("PRAGMA table_info(Questions)", (err, columns) => {
         if (err) return;
         const columnNames = columns.map(c => c.name);
         db.serialize(() => {
-            if (!columnNames.includes('options_json')) {
-                db.run("ALTER TABLE Questions ADD COLUMN options_json TEXT");
-                console.log("🛠️  Migration: Added options_json to Questions");
-            }
-            if (!columnNames.includes('correct_index')) {
-                db.run("ALTER TABLE Questions ADD COLUMN correct_index INTEGER DEFAULT 0");
-                console.log("🛠️  Migration: Added correct_index to Questions");
-            }
+            if (!columnNames.includes('options_json')) db.run("ALTER TABLE Questions ADD COLUMN options_json TEXT");
+            if (!columnNames.includes('correct_index')) db.run("ALTER TABLE Questions ADD COLUMN correct_index INTEGER DEFAULT 0");
         });
     });
 }
 
 /**
- * Initialize Tables (Main Blueprint)
+ * Initialize Tables
  */
 function createTables() {
     db.serialize(() => {
-        // 1. Users Table
+        // 1. Users Table (Updated for Step 2)
+        // Note: country is null by default so we can detect if a user has set it yet.
         db.run(`CREATE TABLE IF NOT EXISTS Users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
             role TEXT DEFAULT 'user',
+            country TEXT,
+            view_global_always INTEGER DEFAULT 0,
             level INTEGER DEFAULT 1,
             xp INTEGER DEFAULT 0,
             streak_count INTEGER DEFAULT 0,
+            otp_code TEXT,
+            otp_expires TEXT,
+            is_verified INTEGER DEFAULT 0,
             last_activity_date DATETIME DEFAULT CURRENT_TIMESTAMP,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
@@ -146,6 +149,10 @@ function createTables() {
             subject TEXT,
             level TEXT,
             standard TEXT, 
+            country_code TEXT DEFAULT 'GLOBAL',
+            price_inr INTEGER DEFAULT 0,
+            price_usd INTEGER DEFAULT 0,
+            badge_icon TEXT DEFAULT '🌟',
             instructor_id INTEGER,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
@@ -212,15 +219,15 @@ function createTables() {
             FOREIGN KEY (module_id) REFERENCES CourseModules(id) ON DELETE CASCADE
         )`);
 
-        // 9. Questions Table (UPDATED: Dynamic Options Support)
+        // 9. Questions Table
         db.run(`CREATE TABLE IF NOT EXISTS Questions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    quiz_id INTEGER NOT NULL,
-    question_text TEXT NOT NULL,
-    options_json TEXT NOT NULL, 
-    correct_index INTEGER NOT NULL,
-    FOREIGN KEY (quiz_id) REFERENCES Quizzes(id) ON DELETE CASCADE
-)`);
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            quiz_id INTEGER NOT NULL,
+            question_text TEXT NOT NULL,
+            options_json TEXT NOT NULL, 
+            correct_index INTEGER NOT NULL,
+            FOREIGN KEY (quiz_id) REFERENCES Quizzes(id) ON DELETE CASCADE
+        )`);
 
         // --- SEED DATA ---
         const adminUsername = 'admin';
@@ -228,19 +235,11 @@ function createTables() {
             .then(user => {
                 if (!user) {
                     const passwordHash = bcrypt.hashSync('admin123', 10);
-                    run(`INSERT INTO Users (username, email, password_hash, role, level, xp) VALUES (?, ?, ?, ?, ?, ?)`,
-                        [adminUsername, 'admin@astrodatahub.com', passwordHash, 'admin', 99, 10000]
-                    );
-                    console.log("--- ADMIN_INITIALIZED ---");
-                }
-            });
-
-        get(`SELECT id FROM DailyBriefing WHERE id = 1`)
-            .then(fact => {
-                if (!fact) {
-                    run(`INSERT INTO DailyBriefing (id, content) VALUES (1, ?)`,
-                        ["A day on Venus is longer than a year on Venus!"]
-                    );
+                    run(`INSERT INTO Users (username, email, password_hash, role, country, level, xp, is_verified) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [adminUsername, 'admin@astrodatahub.com', passwordHash, 'admin', 'GLOBAL', 99, 10000, 1]
+                    )
+                    .then(() => console.log("--- ADMIN_ACCOUNT_READY ---"));
                 }
             });
     });

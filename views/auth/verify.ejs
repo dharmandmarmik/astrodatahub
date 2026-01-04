@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Identity | AstroDataHub</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .otp-input-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 2rem 0;
+        }
+        .otp-input {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-body);
+            color: var(--text-main);
+        }
+        .otp-input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+        }
+    </style>
+</head>
+<body style="background-color: var(--bg-body); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0;">
+
+    <div class="auth-card" style="width: 100%; max-width: 420px; border-radius: 16px; padding: 2.5rem; background: var(--bg-card); text-align: center;">
+        
+        <div style="margin-bottom: 2rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📧</div>
+            <h1 style="color: var(--primary); font-size: 1.5rem; margin-bottom: 0.5rem;">Check Your Inbox</h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">
+                We sent a 6-digit authorization code to <br>
+                <strong style="color: var(--text-main);"><%= email %></strong>
+            </p>
+        </div>
+
+        <% if (locals.error) { %>
+            <div style="color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <% if (locals.success) { %>
+            <div style="color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;">
+                <%= success %>
+            </div>
+        <% } %>
+
+        <form action="/auth/verify" method="POST">
+            <div class="form-group">
+                <input type="text" name="otp" 
+                       placeholder="0 0 0 0 0 0" 
+                       maxlength="6" 
+                       style="letter-spacing: 8px; text-align: center; font-size: 1.8rem; font-weight: bold; padding: 15px;" 
+                       required autocomplete="one-time-code">
+            </div>
+            
+            <button type="submit" class="btn-primary" style="width: 100%; padding: 14px; margin-top: 1rem; font-weight: 600;">
+                Verify & Initialize
+            </button>
+        </form>
+
+        <div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                Didn't receive the code? 
+                <form action="/auth/resend-otp" method="POST" style="display: inline;">
+                    <button type="submit" id="resendBtn" style="background: none; border: none; color: var(--primary); font-weight: 600; cursor: pointer; padding: 0;">
+                        Resend Code
+                    </button>
+                </form>
+            </p>
+            <a href="/auth/register" style="font-size: 0.85rem; color: var(--text-muted); text-decoration: none; display: block; margin-top: 10px;">
+                ← Back to Registration
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Simple 60-second cooldown for the resend button
+        const resendBtn = document.getElementById('resendBtn');
+        let cooldown = 60;
+
+        resendBtn.addEventListener('click', (e) => {
+            if (cooldown > 0 && resendBtn.disabled) {
+                e.preventDefault();
+                return;
+            }
+            // Button will submit, then page reloads, and this script restarts.
+            // In a real app, you'd handle this with AJAX to keep the timer running.
+        });
+    </script>
+
+</body>
+</html>

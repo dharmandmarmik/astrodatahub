@@ -6,10 +6,28 @@
     <title>Create Account | AstroDataHub</title>
     <link rel="stylesheet" href="/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Ensuring the error banner looks consistent */
+        .error-banner {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body style="background-color: var(--bg-body); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0;">
 
-    <div class="auth-card" style="width: 100%; max-width: 420px; border-radius: 16px;">
+    <div class="auth-card" style="width: 100%; max-width: 420px; border-radius: 16px; padding: 2rem; background: var(--bg-card); box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
         <div style="text-align: center; margin-bottom: 2rem;">
             <h1 style="color: var(--primary); font-size: 1.5rem; margin-bottom: 0.5rem;">Join AstroDataHub</h1>
             <p style="color: var(--text-muted); font-size: 0.95rem;">Create your credentials to start learning.</p>
@@ -19,7 +37,7 @@
             <div class="error-banner"><%= error %></div>
         <% } %>
 
-        <form action="/auth/register" method="POST">
+        <form action="/auth/register" method="POST" id="registerForm">
             <div class="form-group">
                 <label>Full Name</label>
                 <input type="text" name="username" placeholder="e.g. Alex North" required>
@@ -28,22 +46,38 @@
             <div class="form-group">
                 <label>Email Address</label>
                 <input type="email" name="email" placeholder="alex@space-edu.com" required>
+                <small style="color: var(--text-muted); font-size: 0.75rem; display: block; mt: 5px;">
+                    We will send a 6-digit verification code here.
+                </small>
             </div>
             
             <div class="form-group" style="margin-bottom: 1.5rem;">
                 <label>Create Access Key (Password)</label>
-                <input type="password" name="password" placeholder="Min. 8 characters" required>
+                <input type="password" name="password" placeholder="Min. 8 characters" minlength="8" required>
             </div>
             
-            <button type="submit" class="btn-primary" style="width: 100%; padding: 14px;">Create My Account</button>
+            <button type="submit" class="btn-primary" id="submitBtn" style="width: 100%; padding: 14px; font-weight: 600;">
+                Create My Account
+            </button>
         </form>
 
         <div style="margin-top: 2rem; text-align: center; border-top: 1px solid var(--border); padding-top: 1.5rem;">
             <p style="font-size: 0.9rem; color: var(--text-muted);">
-                Already have an account? <a href="/auth/login" style="font-weight: 600;">Sign In Instead</a>
+                Already have an account? <a href="/auth/login" style="font-weight: 600; color: var(--primary); text-decoration: none;">Sign In Instead</a>
             </p>
         </div>
     </div>
+
+    <script>
+        // Simple UX: Disable button on submit to prevent double registration
+        const form = document.getElementById('registerForm');
+        const btn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', () => {
+            btn.innerText = 'Sending Authorization...';
+            btn.disabled = true;
+        });
+    </script>
 
 </body>
 </html>

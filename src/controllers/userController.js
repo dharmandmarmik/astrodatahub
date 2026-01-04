@@ -346,27 +346,65 @@ async function updateStreak(userId) {
 }
 
 // --- 7. QUIZ SUBMISSION LOGIC ---
+// --- Inside your submitQuiz function in userController.js ---
+
 exports.submitQuiz = async (req, res) => {
     const { moduleId } = req.params;
     const userId = req.session.user.id;
-    const { userAnswers } = req.body; // Expecting { questionId: 'A', ... }
 
     try {
-        // 1. Mark module as completed in DB
+        // 1. Mark module as completed
         await run('INSERT OR IGNORE INTO Completions (user_id, module_id) VALUES (?, ?)', [userId, moduleId]);
         
-        // 2. Update the Streak!
+        // 2. Update Streak
         await updateStreak(userId);
 
-        // 3. Award XP 
-        await run('UPDATE Users SET xp = xp + 100 WHERE id = ?', [userId]);
+        // 3. Award XP & Recalculate Level in Database
+        await run(`
+            UPDATE Users SET 
+                xp = xp + 100, 
+                level = ((xp + 100) / 1000) + 1 
+            WHERE id = ?`, 
+        [userId]);
 
-        // 4. Send a notification for leveling up/progress
-        await sendNotification(userId, 'progress', 'Module Completed!', 'You have successfully analyzed the module data and earned 100 XP.');
+        // --- CRITICAL ADDITION: SYNC THE SESSION ---
+        // This ensures the EJS templates see the new XP immediately
+        if (req.session.user) {
+            req.session.user.xp += 100;
+            // Matches your level logic: Every 1000 XP is a level
+            req.session.user.level = Math.floor(req.session.user.xp / 1000) + 1;
+        }
+        // ------------------------------------------
 
-        res.json({ success: true, message: "Streak updated and XP awarded!" });
+        // 4. Badge Logic (Existing code...)
+        const moduleData = await get('SELECT course_id FROM CourseModules WHERE id = ?', [moduleId]);
+        const courseId = moduleData.course_id;
+
+        const progress = await get(`
+            SELECT 
+                (SELECT COUNT(*) FROM CourseModules WHERE course_id = ?) as total_mods,
+                (SELECT COUNT(*) FROM Completions c 
+                 JOIN CourseModules m ON c.module_id = m.id 
+                 WHERE m.course_id = ? AND c.user_id = ?) as completed_mods
+        `, [courseId, courseId, userId]);
+
+        if (progress.total_mods > 0 && progress.total_mods === progress.completed_mods) {
+            await run(
+                'UPDATE Enrollments SET status = "completed" WHERE user_id = ? AND course_id = ?',
+                [userId, courseId]
+            );
+            await sendNotification(userId, 'achievement', 'Mastery Badge Unlocked!', 'Visit your profile to see your new badge.');
+        }
+
+        res.json({ 
+            success: true, 
+            message: "Mission success!",
+            newXp: req.session.user.xp, // Send back the updated value
+            newLevel: req.session.user.level
+        });
+
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: "Server error during submission." });
+        console.error("QUIZ_SUBMIT_ERROR:", err);
+        res.status(500).json({ success: false, message: "Transmission failed." });
     }
 };

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Complete Your Profile | AstroDataHub</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .onboarding-box { max-width: 500px; margin: 80px auto; padding: 40px; text-align: center; background: #fff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .feature-icon { font-size: 3rem; margin-bottom: 20px; }
+        .reason-box { background: #f0f7ff; padding: 15px; border-radius: 8px; margin: 20px 0; font-size: 0.95rem; color: #2c5282; line-height: 1.5; }
+        select { width: 100%; padding: 12px; margin: 20px 0; border-radius: 6px; border: 2px solid #e2e8f0; font-size: 1rem; }
+        .btn-start { width: 100%; background: #4a90e2; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <div class="onboarding-box">
+            <div class="feature-icon">🚀</div>
+            <h2>One last thing, <%= user.username %>!</h2>
+            
+            <div class="reason-box">
+                <strong>Why choose a country?</strong><br>
+                We tailor your learning journey based on your region. This ensures you see relevant exams (like IIT-JEE for India or A-Levels for UK) and local pricing.
+            </div>
+
+            <form action="/auth/update-country" method="POST">
+                <label for="country">Where are you learning from?</label>
+                <select name="country" id="country" required>
+                    <option value="" disabled selected>Select your region...</option>
+                    <option value="IN">🇮🇳 India (JEE/NEET/CBSE)</option>
+                    <option value="GB">🇬🇧 United Kingdom (GCSE/A-Levels)</option>
+                    <option value="US">🇺🇸 United States (SAT/AP)</option>
+                    <option value="GLOBAL">🌍 Other / International Curriculum</option>
+                </select>
+
+                <button type="submit" class="btn-start">Personalize My Dashboard</button>
+            </form>
+            
+            <p style="margin-top: 15px; font-size: 0.8rem; color: #718096;">
+                You can change this anytime in your settings.
+            </p>
+        </div>
+    </main>
+</body>
+</html>

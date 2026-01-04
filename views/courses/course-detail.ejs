@@ -6,6 +6,19 @@
     <title><%= course.title %> | AstroDataHub</title>
     <link rel="stylesheet" href="/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .price-container {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        .price-label { font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
+        .price-value { font-size: 1.75rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 6px; }
+        .original-price { font-size: 0.9rem; text-decoration: line-through; color: #94a3b8; font-weight: 500; }
+        .currency-badge { font-size: 0.65rem; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 4px; }
+    </style>
 </head>
 <body style="background-color: var(--bg-body);">
 
@@ -27,6 +40,9 @@
                         </span>
                         <span style="background: #f8fafc; border: 1px solid var(--border); color: var(--text-muted); padding: 4px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
                             Level: <%= course.level %>
+                        </span>
+                        <span style="background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; padding: 4px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                            <%= course.region %> Track
                         </span>
                     </div>
                     <h1 style="font-size: 2.5rem; line-height: 1.2; margin-bottom: 1.5rem;"><%= course.title %></h1>
@@ -79,6 +95,26 @@
             <aside>
                 <div class="auth-card" style="position: sticky; top: 100px; padding: 2rem; border-radius: 16px;">
                     <h4 style="margin-bottom: 1rem;">Course Status</h4>
+                    
+                    <div class="price-container">
+                        <span class="price-label">Current Enrollment Fee</span>
+                        <div class="price-value">
+                            <% if (userCountry === 'IN') { %>
+                                ₹<%= (course.price_inr || 0).toLocaleString('en-IN') %>
+                                <span class="currency-badge">INR</span>
+                            <% } else { %>
+                                $<%= (course.price_usd || 0) %>
+                                <span class="currency-badge">USD</span>
+                            <% } %>
+                        </div>
+                        <div style="margin-top: 5px;">
+                            <span class="original-price">
+                                <%= userCountry === 'IN' ? '₹4,999' : '$59' %>
+                            </span>
+                            <span style="font-size: 0.75rem; color: #16a34a; font-weight: 700; margin-left: 8px;">100% OFF</span>
+                        </div>
+                    </div>
+
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
                         Enroll to gain full access to datasets, research modules, and certification of completion.
                     </p>
@@ -100,7 +136,7 @@
                                 <div style="background: #f0fdf4; color: #166534; padding: 10px; border-radius: 8px; margin-bottom: 1rem; font-size: 0.85rem; font-weight: 600;">
                                     ✓ Mission Active
                                 </div>
-                                <a href="/" class="btn-primary" style="display: block; text-align: center; text-decoration: none; background: #1e293b; margin-bottom: 2rem;">Back to Dashboard</a>
+                                <a href="/dashboard" class="btn-primary" style="display: block; text-align: center; text-decoration: none; background: #1e293b; margin-bottom: 2rem;">Go to Dashboard</a>
                                 
                                 <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; text-align: left;">
                                     <h5 style="color: #dc2626; font-size: 0.8rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Danger Zone</h5>
@@ -113,7 +149,7 @@
                             </div>
                         <% } else { %>
                             <form action="/courses/enroll/<%= course.id %>" method="POST">
-                                <button type="submit" class="btn-primary" style="width: 100%;">Enroll in Course</button>
+                                <button type="submit" class="btn-primary" style="width: 100%;">Enroll for Free</button>
                             </form>
                         <% } %>
                     <% } else { %>

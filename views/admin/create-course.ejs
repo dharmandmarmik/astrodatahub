@@ -14,6 +14,14 @@
             border-bottom-left-radius: 8px;
             border-bottom-right-radius: 8px;
         }
+        .market-section { 
+            background: #f8fafc; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 20px 0; 
+            border: 1px solid #e2e8f0;
+        }
+        .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -50,18 +58,25 @@
 
             <select name="standard" required>
                 <option value="">Select Academic Path (Standard)</option>
+                <optgroup label="Competitive (India)">
+                    <option value="IIT-JEE">IIT-JEE (Mains/Adv)</option>
+                    <option value="NEET">NEET (Medical)</option>
+                    <option value="Olympiad">Olympiad / KVPY</option>
+                </optgroup>
                 <optgroup label="Schooling">
                     <% for(let i=1; i<=12; i++) { %>
                         <option value="Class <%= i %>">Class <%= i %></option>
                     <% } %>
                 </optgroup>
+                <optgroup label="International">
+                    <option value="IB Diploma">IB Diploma</option>
+                    <option value="IGCSE">IGCSE / O-Levels</option>
+                    <option value="SAT/ACT">SAT / ACT Prep</option>
+                </optgroup>
                 <optgroup label="Higher Ed">
                     <option value="Bachelors">Undergraduate (Bachelors)</option>
                     <option value="Masters">Post-Graduate (Masters)</option>
                     <option value="PhD / Doctorate">PhD / Doctorate</option>
-                </optgroup>
-                <optgroup label="Specialized">
-                    <option value="Research">Research & Thesis</option>
                 </optgroup>
             </select>
             
@@ -71,6 +86,32 @@
                 <option value="Intermediate">Intermediate</option>
                 <option value="Expert">Expert</option>
             </select>
+
+            <div class="market-section">
+    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Target Audience (Step 3: Admin Selection)</label>
+    <select name="country_code" required>
+        <option value="GLOBAL">🌍 Global (Show to everyone)</option>
+        <option value="IN">🇮🇳 India Only</option>
+        <option value="GB">🇬🇧 United Kingdom Only</option>
+        <option value="US">🇺🇸 United States Only</option>
+        <option value="CA">🇨🇦 Canada Only</option>
+        <option value="AU">🇦🇺 Australia Only</option>
+    </select>
+    
+    <div class="price-grid">
+        <div>
+            <label style="font-size: 12px; color: #64748b;">Price (INR ₹)</label>
+            <input type="number" name="price_inr" placeholder="4999" style="margin-bottom: 0;">
+        </div>
+        <div>
+            <label style="font-size: 12px; color: #64748b;">Price (USD $)</label>
+            <input type="number" name="price_usd" placeholder="59" style="margin-bottom: 0;">
+        </div>
+    </div>
+    <p style="font-size: 11px; color: #94a3b8; margin-top: 8px;">
+        * Step 4: System will automatically show this course to users in the selected country.
+    </p>
+</div>
             
             <input type="hidden" name="description" id="courseDescriptionInput">
 

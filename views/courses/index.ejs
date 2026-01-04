@@ -6,238 +6,230 @@
     <title><%= title %> | AstroDataHub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --accent: #2563eb; 
-            --text-dark: #0f172a; 
-            --text-muted: #64748b;
-            --bg-light: #f8fafc;
-        }
+        :root { --accent: #2563eb; --indian-orange: #f97316; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
 
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: var(--bg-light); 
-        }
+        /* Amazon-style Sidebar */
+        .filter-group-title { font-size: 0.65rem; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; padding-left: 0.5rem; }
+        .sidebar-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 12px; font-size: 0.875rem; color: #475569; transition: all 0.2s; font-weight: 500; }
+        .sidebar-item:hover { background: white; color: var(--accent); transform: translateX(4px); }
+        .sidebar-item.active { background: var(--accent); color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2); }
 
-        /* Udemy-style Card Hover */
-        .course-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid #e2e8f0;
-            background: white;
-        }
-
-        .course-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-            border-color: var(--accent);
-        }
-
-        .sidebar-link {
-            display: block;
-            padding: 10px 16px;
-            border-radius: 12px;
-            color: var(--text-muted);
-            font-weight: 600;
-            transition: all 0.2s;
-            border-left: 4px solid transparent;
-            font-size: 0.875rem;
-        }
-
-        .sidebar-link:hover {
-            background: white;
-            color: var(--accent);
-        }
-
-        /* Active Filter State */
-        .sidebar-link.active {
-            background: white;
-            color: var(--accent);
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
-            border-left: 4px solid var(--accent);
-        }
-
-        .search-container {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 6px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
-        }
-
+        /* Batch Cards */
+        .batch-card { border-radius: 28px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: white; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; }
+        .batch-card:hover { transform: translateY(-8px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); border-color: var(--accent); }
+        
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .status-pill { padding: 4px 12px; border-radius: 99px; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 5px; }
+        .live-pulse { width: 6px; height: 6px; background: #ef4444; border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body class="antialiased">
     <%- include('../partials/header') %>
 
-    <section class="bg-white border-b border-slate-200 pt-32 pb-16">
-        <div class="max-w-7xl mx-auto px-6">
-            <h1 class="text-5xl font-extrabold text-slate-900 tracking-tight mb-4">Educational Cosmos</h1>
-            <p class="text-xl text-slate-500 max-w-2xl">A complete learning trajectory from Class 1 foundations to professional PhD research.</p>
-            
-            <form action="/courses" method="GET" class="search-container mt-10 max-w-lg">
-                <input 
-                    type="text" 
-                    name="search" 
-                    placeholder="Search courses, subjects, or levels..." 
-                    value="<%= activeSearch %>"
-                    class="flex-1 px-4 py-2 outline-none text-slate-600 font-medium"
-                >
-                <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors">
-                    Search
-                </button>
-            </form>
+    <header class="bg-[#020617] pt-36 pb-16 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_50%,#2563eb,transparent_70%)]"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                <div>
+                    <h1 class="text-5xl font-black text-white leading-tight">Academic <span class="text-blue-500">Galaxy</span></h1>
+                    <p class="text-slate-400 mt-4 text-lg">World-class curriculum for India and the World.</p>
+                </div>
+                <form action="/courses" method="GET" class="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 p-2 rounded-2xl flex items-center focus-within:border-blue-500 transition-all">
+                    <input type="text" name="search" placeholder="Search JEE, SAT, Physics..." value="<%= activeSearch %>" class="bg-transparent flex-1 px-4 py-3 outline-none text-white font-medium placeholder:text-slate-500">
+                    <button type="submit" class="bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"/></svg>
+                    </button>
+                </form>
+            </div>
         </div>
-    </section>
+    </header>
 
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+    <div class="max-w-7xl mx-auto px-6 py-12">
+        <% if (userCountry === 'IN') { %>
+            <div class="bg-orange-50 border border-orange-100 p-5 rounded-[24px] mb-10 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <span class="text-3xl">🇮🇳</span>
+                    <div>
+                        <p class="text-[10px] font-black text-orange-600 uppercase tracking-widest">Optimized for India</p>
+                        <p class="text-sm font-bold text-slate-800">Showing IIT-JEE, NEET, and CBSE National Curriculum.</p>
+                    </div>
+                </div>
+                <a href="/courses?standard=IB Diploma" class="text-xs font-bold text-orange-700 bg-white px-4 py-2 rounded-lg shadow-sm border border-orange-100">Switch to Global View</a>
+            </div>
+        <% } else if (userCountry === 'GB') { %>
+            <div class="bg-blue-50 border border-blue-100 p-5 rounded-[24px] mb-10 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <span class="text-3xl">🇬🇧</span>
+                    <div>
+                        <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest">UK Academic Region</p>
+                        <p class="text-sm font-bold text-slate-800">Showing GCSE, A-Levels, and International Research tracks.</p>
+                    </div>
+                </div>
+                <a href="/courses?standard=IIT-JEE" class="text-xs font-bold text-blue-700 bg-white px-4 py-2 rounded-lg shadow-sm border border-blue-100">Switch to India View</a>
+            </div>
+        <% } else { %>
+            <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-[24px] mb-10 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <span class="text-3xl">🌍</span>
+                    <div>
+                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Global Access</p>
+                        <p class="text-sm font-bold text-slate-800">Showing IB Diploma, IGCSE, SAT, and Research tracks.</p>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+
         <div class="flex flex-col lg:flex-row gap-12">
             
-            <aside class="w-full lg:w-64 flex-shrink-0">
-                <div class="sticky top-28">
-                    
-                    <div class="mb-10">
-                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Academic Path</h3>
-                        <nav class="space-y-1 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
-                            
-                            <div class="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Primary & Secondary</div>
-                            <% for(let i=1; i<=12; i++) { %>
-                                <a href="/courses?standard=Class <%= i %>" class="sidebar-link <%= activeStandard === 'Class ' + i ? 'active' : '' %>">
-                                    Class <%= i %>
-                                </a>
-                            <% } %>
+            <aside class="w-full lg:w-72 flex-shrink-0">
+    <div class="sticky top-28 space-y-8">
+        
+        <div>
+            <h3 class="filter-group-title">Target Goals</h3>
+            <nav class="space-y-1">
+                <% 
+                   // Define dynamic goals based on country
+                   let regionalGoals = [];
+                   if (userCountry === 'IN') {
+                       regionalGoals = ["IIT-JEE", "NEET", "Olympiads", "CBSE Boards", "CUET"];
+                   } else if (userCountry === 'GB') {
+                       regionalGoals = ["A-Levels", "GCSE", "BTEC", "Oxbridge Prep", "11 Plus"];
+                   } else {
+                       regionalGoals = ["IB Diploma", "SAT / AP Prep", "IGCSE", "Research Paper"];
+                   }
+                   
+                   // Add universal advanced goals to every list
+                   const finalGoals = [...regionalGoals, "Masters (MSc/MA)", "PhD Track"];
+                %>
+                
+                <% finalGoals.forEach(goal => { %>
+                    <a href="/courses?standard=<%= goal %>" class="sidebar-item <%= activeStandard === goal ? 'active' : '' %>">
+                        <%= goal %>
+                    </a>
+                <% }) %>
+            </nav>
+        </div>
 
-                            <div class="px-4 py-2 mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Higher Education</div>
-                            <% ["Bachelors", "Masters", "PhD / Doctorate"].forEach(std => { %>
-                                <a href="/courses?standard=<%= std %>" class="sidebar-link <%= activeStandard === std ? 'active' : '' %>">
-                                    <%= std %>
-                                </a>
-                            <% }) %>
+        <div>
+            <h3 class="filter-group-title">Specialization</h3>
+            <nav class="space-y-1">
+                <% const subMap = { 'Mathematics': 'bg-pink-500', 'Astronomy': 'bg-orange-500', 'Physics': 'bg-purple-500', 'Chemistry': 'bg-emerald-500', 'Computer Science': 'bg-blue-500' }; %>
+                <% Object.keys(subMap).forEach(sub => { %>
+                    <a href="/courses?subject=<%= sub %>" class="sidebar-item <%= activeSubject === sub ? 'active' : '' %>">
+                        <%= sub %>
+                        <span class="w-1.5 h-1.5 rounded-full <%= subMap[sub] %> <%= activeSubject === sub ? 'bg-white' : '' %>"></span>
+                    </a>
+                <% }) %>
+            </nav>
+        </div>
 
-                            <div class="px-4 py-2 mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Professional</div>
-                            <a href="/courses?standard=Research" class="sidebar-link <%= activeStandard === 'Research' ? 'active' : '' %>">
-                                Research & Thesis
-                            </a>
-                        </nav>
-                    </div>
-
-                    <div class="mb-10">
-                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Difficulty</h3>
-                        <nav class="space-y-1">
-                            <a href="/courses" class="sidebar-link <%= !activeLevel && !activeSubject && !activeStandard ? 'active' : '' %>">
-                                All Courses
-                            </a>
-                            <a href="/courses?level=Beginner" class="sidebar-link <%= activeLevel === 'Beginner' ? 'active' : '' %>">
-                                Beginner
-                            </a>
-                            <a href="/courses?level=Intermediate" class="sidebar-link <%= activeLevel === 'Intermediate' ? 'active' : '' %>">
-                                Intermediate
-                            </a>
-                            <a href="/courses?level=Expert" class="sidebar-link <%= activeLevel === 'Expert' ? 'active' : '' %>">
-                                Expert
-                            </a>
-                        </nav>
-                    </div>
-
-                    <div class="mb-10">
-                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Categories</h3>
-                        <nav class="space-y-1">
-                            <a href="/courses?subject=Mathematics" class="sidebar-link <%= activeSubject === 'Mathematics' ? 'active' : '' %>">
-                                Mathematics
-                            </a>
-                            <a href="/courses?subject=Astronomy" class="sidebar-link <%= activeSubject === 'Astronomy' ? 'active' : '' %>">
-                                Astronomy
-                            </a>
-                            <a href="/courses?subject=Computer Science" class="sidebar-link <%= activeSubject === 'Computer Science' ? 'active' : '' %>">
-                                Computer Science
-                            </a>
-                        </nav>
-                    </div>
-
-                    <% if (activeLevel || activeSubject || activeSearch || activeStandard) { %>
-                        <div class="mt-8 pt-6 border-t border-slate-200">
-                            <a href="/courses" class="text-sm font-bold text-red-500 hover:text-red-700 flex items-center gap-2">
-                                ✕ Reset All Filters
-                            </a>
-                        </div>
+        <div>
+            <h3 class="filter-group-title">Educational Level</h3>
+            <div class="max-h-64 overflow-y-auto custom-scrollbar pr-2 space-y-1">
+                <p class="text-[9px] font-bold text-slate-400 px-3 py-2 uppercase">Higher Ed</p>
+                <a href="/courses?standard=Post Graduate" class="sidebar-item <%= activeStandard === 'Post Graduate' ? 'active' : '' %>">Post Graduate</a>
+                <a href="/courses?standard=Undergraduate" class="sidebar-item <%= activeStandard === 'Undergraduate' ? 'active' : '' %>">Undergraduate</a>
+                
+                <p class="text-[9px] font-bold text-slate-400 px-3 py-2 uppercase mt-2">Schooling</p>
+                
+                <% if (userCountry === 'IN') { %>
+                    <% for(let i=12; i>=1; i--) { %>
+                        <a href="/courses?standard=Class <%= i %>" class="sidebar-item <%= activeStandard === 'Class ' + i ? 'active' : '' %>">
+                            Class <%= i %>
+                        </a>
                     <% } %>
-                </div>
-            </aside>
+                <% } else if (userCountry === 'GB') { %>
+                    <% for(let i=13; i>=1; i--) { %>
+                        <a href="/courses?standard=Year <%= i %>" class="sidebar-item <%= activeStandard === 'Year ' + i ? 'active' : '' %>">
+                            Year <%= i %>
+                        </a>
+                    <% } %>
+                <% } else { %>
+                    <a href="/courses?standard=High School" class="sidebar-item">High School</a>
+                    <a href="/courses?standard=Middle School" class="sidebar-item">Middle School</a>
+                <% } %>
+            </div>
+        </div>
+
+        <a href="/courses" class="block text-center py-4 text-xs font-black text-red-500 border-t border-slate-100 hover:bg-red-50 rounded-b-xl">RESET FILTERS</a>
+    </div>
+</aside>
 
             <main class="flex-1">
-                <div class="flex items-center justify-between mb-8">
-                    <h2 class="text-2xl font-bold text-slate-900">
-                        <% if (activeSearch) { %>
-                            Results for "<%= activeSearch %>"
-                        <% } else if (activeStandard) { %>
-                            <%= activeStandard %> Programs
-                        <% } else if (activeSubject || activeLevel) { %>
-                            Filtered Results
-                        <% } else { %>
-                            Recommended Missions
-                        <% } %>
-                    </h2>
-                    <span class="text-sm font-semibold text-slate-500"><%= courses.length %> Courses found</span>
-                </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <% if (courses && courses.length > 0) { %>
                         <% courses.forEach(course => { %>
-                            <div class="course-card rounded-3xl overflow-hidden flex flex-col">
-                                <div class="h-48 bg-slate-100 flex items-center justify-center border-b border-slate-100 relative">
-                                    <span class="text-5xl">🚀</span>
-                                    <% if (course.standard) { %>
-                                        <span class="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-sm uppercase">
-                                            <%= course.standard %>
-                                        </span>
-                                    <% } %>
-                                    <span class="absolute top-4 right-4 bg-white/80 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-slate-600 shadow-sm">
-                                        ID: #<%= course.id %>
+                            <div class="batch-card group">
+                                <div class="h-48 bg-slate-900 relative flex items-center justify-center">
+                                    <div class="absolute inset-0 opacity-40 bg-gradient-to-br from-blue-900 to-black"></div>
+                                    <span class="text-6xl z-10 transition-transform group-hover:scale-110 duration-500">
+                                        <% if(course.subject.includes('Math')) { %>📐<% } 
+                                           else if(course.subject.includes('Chem')) { %>🧪<% } 
+                                           else if(course.subject.includes('Physics')) { %>⚛️<% } 
+                                           else if(course.subject.includes('Astronomy')) { %>🪐<% } 
+                                           else { %>💻<% } %>
                                     </span>
-                                </div>
-                                
-                                <div class="p-8 flex-1 flex flex-col">
-                                    <div class="flex gap-2 mb-4">
-                                        <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                                    
+                                    <div class="absolute top-4 left-4">
+                                        <div class="bg-white/90 backdrop-blur px-3 py-1 rounded-lg text-[10px] font-black text-slate-900 uppercase tracking-widest">
                                             <%= course.subject %>
-                                        </span>
-                                        <span class="bg-slate-50 text-slate-500 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider">
-                                            <%= course.level %>
-                                        </span>
+                                        </div>
                                     </div>
-                                    
-                                    <h3 class="text-xl font-bold text-slate-900 mb-3 leading-tight hover:text-blue-600 transition-colors">
-                                        <%= course.title %>
-                                    </h3>
-                                    
-                                    <div class="text-slate-500 text-sm line-clamp-2 mb-6">
-                                        <%= course.description.replace(/<[^>]*>?/gm, '').substring(0, 100) %>...
+                                    <div class="absolute top-4 right-4">
+                                        <div class="status-pill bg-white/10 text-white backdrop-blur border border-white/20">
+                                            <span class="live-pulse"></span> LIVE
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="p-8 flex-1 flex flex-col">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="text-[10px] font-black text-blue-600 uppercase tracking-tighter"><%= course.standard %></span>
+                                        <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase"><%= course.level %></span>
                                     </div>
 
+                                    <h3 class="text-xl font-extrabold text-slate-900 leading-tight mb-4 group-hover:text-blue-600 transition-colors">
+                                        <%= course.title %>
+                                    </h3>
+
+                                    <p class="text-slate-500 text-sm line-clamp-2 mb-8 leading-relaxed">
+                                        <%= course.description.replace(/<[^>]*>?/gm, '') %>
+                                    </p>
+
                                     <div class="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
-                                        <div class="flex items-center gap-1">
-                                            <span class="text-yellow-400 text-lg">★</span>
-                                            <span class="font-bold text-slate-900">4.9</span>
+                                        <div>
+                                            <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Fee Structure</p>
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="text-2xl font-black text-slate-900">FREE</span>
+                                                <span class="text-xs text-slate-400 line-through font-bold">
+                                                    <% if (userCountry === 'IN') { %>
+                                                        ₹<%= (course.price_inr || 4999).toLocaleString('en-IN') %>
+                                                    <% } else { %>
+                                                        $<%= course.price_usd || 59 %>
+                                                    <% } %>
+                                                </span>
+                                            </div>
                                         </div>
-                                        <a href="/courses/course/<%= course.id %>" class="text-blue-600 font-bold hover:underline">
-                                            Explore Details →
+                                        <a href="/courses/course/<%= course.id %>" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-blue-100 hover:shadow-none">
+                                            JOIN BATCH
                                         </a>
                                     </div>
                                 </div>
                             </div>
                         <% }) %>
                     <% } else { %>
-                        <div class="col-span-full py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200 text-center">
-                            <div class="text-6xl mb-6">🔭</div>
-                            <h3 class="text-xl font-bold text-slate-900 mb-2">No missions found</h3>
-                            <p class="text-slate-500 mb-8">Try adjusting your filters or search terms.</p>
-                            <a href="/courses" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-slate-800 transition-all">
-                                View All Curriculum
-                            </a>
+                        <div class="col-span-full py-32 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-100">
+                            <span class="text-7xl block mb-6">🔭</span>
+                            <h3 class="text-2xl font-black text-slate-900">Orbit Empty</h3>
+                            <p class="text-slate-500 mt-2">No batches found matching these coordinates.</p>
+                            <a href="/courses" class="mt-6 inline-block text-blue-600 font-bold underline">Clear All Filters</a>
                         </div>
                     <% } %>
                 </div>

@@ -1,5 +1,5 @@
 // server.js - THE MASTER CONTROL FILAMENT
-require('dotenv').config(); // CRITICAL: This must be Line 1 to load Client ID/Secret
+require('dotenv').config(); 
 
 const express = require('express');
 const session = require('express-session');
@@ -78,21 +78,24 @@ app.get('/support', (req, res) => {
     });
 });
 
-/**
- * DYNAMIC PROFILE ROUTE
- * Handles: localhost:4000/@username
- * This must exist outside the /user prefix logic to match the @ pattern
- */
-app.get('/@:username', userController.getPublicProfile);
-
-// Modular Routes
+// --- PRIORITY MODULAR ROUTES ---
+// We move these ABOVE the @username route so they are checked first
 app.use('/auth', authRoutes);     
 app.use('/user', userRoutes);     
 app.use('/admin', adminRoutes);   
 app.use('/courses', courseRoutes); 
 app.use('/api/notifications', notificationRoutes);
 
+/**
+ * DYNAMIC PROFILE ROUTE
+ * Handles: localhost:4000/@username
+ * MOVED BELOW: If this is above /admin, it will capture "/admin" as a username.
+ */
+app.get('/@:username', userController.getPublicProfile);
+
 // --- ERROR HANDLING ---
+
+
 
 // 404 Handler - Keep this at the bottom of all routes
 app.use((req, res) => {

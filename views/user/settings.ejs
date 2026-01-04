@@ -7,122 +7,191 @@
     <link rel="stylesheet" href="/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
         body { 
-            background-color: #f8fafc; 
-            color: #1e293b; 
+            background-color: var(--bg-main); 
+            color: var(--text-main); 
             font-family: 'Inter', sans-serif;
+            line-height: 1.5;
         }
 
         .settings-container {
-            max-width: 1100px;
-            margin: 3rem auto;
+            max-width: 1000px;
+            margin: 4rem auto;
             display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 2rem;
-            padding: 0 20px;
+            grid-template-columns: 260px 1fr;
+            gap: 3rem;
+            padding: 0 24px;
         }
 
-        /* Sidebar Navigation */
+        /* Sidebar Style */
         .sidebar-nav {
             position: sticky;
             top: 2rem;
-            height: fit-content;
         }
 
-        .nav-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        .sidebar-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-left: 12px;
         }
 
         .nav-link {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px 16px;
-            color: #64748b;
+            padding: 10px 12px;
+            color: var(--text-muted);
             text-decoration: none;
             border-radius: 8px;
             margin-bottom: 4px;
-            transition: all 0.2s ease;
-            font-weight: 500;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            background: #f1f5f9;
-            color: #0f172a;
-        }
-
-        /* Content Cards */
-        .white-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: #0f172a;
-        }
-
-        /* Form Styling */
-        .form-group { margin-bottom: 1.25rem; }
-        
-        label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #475569;
-            margin-bottom: 0.5rem;
-        }
-
-        input {
-            width: 100%;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 10px 14px;
-            color: #1e293b;
+            transition: all 0.2s;
             font-size: 0.95rem;
         }
 
+        .nav-link:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        .nav-link.active {
+            background: #eff6ff;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Card System */
+        .settings-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .section-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-header h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .section-header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 4px 0 0 0;
+        }
+
+        .section-content { padding: 2rem; }
+
+        /* Forms & Inputs */
+        .form-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            align-items: start;
+        }
+
+        .label-box label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: block;
+        }
+
+        .label-box p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 4px 0 0 0;
+        }
+
+        input, select {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 9px 12px;
+            font-size: 0.95rem;
+            transition: border 0.2s;
+        }
+
         input:focus {
-            border-color: #2563eb;
             outline: none;
+            border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        .btn-save {
-            background: #0f172a;
-            color: white;
-            padding: 10px 20px;
+        /* Preferences / Toggle */
+        .toggle-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            padding: 1rem 1.5rem;
             border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-toggle {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-on { background: var(--success); color: white; }
+        .btn-off { background: var(--text-muted); color: white; }
+
+        .btn-save {
+            background: var(--text-main);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 6px;
             border: none;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .btn-save:hover { opacity: 0.9; }
-
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
             font-size: 0.9rem;
         }
-        .alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
-        .alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
 
-        @media (max-width: 768px) {
-            .settings-container { grid-template-columns: 1fr; }
+        .btn-save:hover { background: #334155; }
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .alert-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+        @media (max-width: 850px) {
+            .settings-container { grid-template-columns: 1fr; margin: 1rem auto; }
+            .sidebar-nav { display: none; }
+            .form-row { grid-template-columns: 1fr; gap: 0.5rem; }
         }
     </style>
 </head>
@@ -133,68 +202,110 @@
     <main class="settings-container">
         
         <aside class="sidebar-nav">
-            <div class="nav-card">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9;">
-                    <div style="width: 40px; height: 40px; background: #2563eb; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700;">
-                        <%= user.username.charAt(0).toUpperCase() %>
-                    </div>
-                    <div>
-                        <h4 style="margin:0; font-size: 0.9rem;"><%= user.username %></h4>
-                        <a href="/@<%= user.username %>" style="font-size: 0.75rem; color: #2563eb; text-decoration: none;">View Public Profile</a>
-                    </div>
-                </div>
-                
-                <nav>
-                    <a href="#account" class="nav-link active">⚙️ Account Info</a>
-                    <a href="#security" class="nav-link">🔒 Security</a>
-                    <a href="/user/dashboard" class="nav-link">📊 Learning Dashboard</a>
-                </nav>
-            </div>
+            <h3 class="sidebar-title">Personal Settings</h3>
+            <nav>
+                <a href="#preferences" class="nav-link active">🌍 Region & Discovery</a>
+                <a href="#account" class="nav-link">👤 Account Profile</a>
+                <a href="#security" class="nav-link">🔒 Login & Security</a>
+            </nav>
+            <hr style="border:0; border-top: 1px solid var(--border); margin: 2rem 0;">
+            <a href="/user/dashboard" class="nav-link">← Back to Learning</a>
         </aside>
 
         <section>
             
             <% if (success) { %>
-                <div class="alert alert-success">✅ <%= success %></div>
+                <div class="alert alert-success">Success: <%= success %></div>
             <% } %>
             <% if (error) { %>
-                <div class="alert alert-error">❌ <%= error %></div>
+                <div class="alert alert-error">Error: <%= error %></div>
             <% } %>
 
-            <div id="account" class="white-card">
-                <h2 class="section-title">Account Details</h2>
-                <form action="/user/settings/update" method="POST">
-                    <div class="form-group">
-                        <label>Username</label>
-                        <input type="text" name="username" value="<%= user.username %>" required>
+            <div id="preferences" class="settings-section">
+                <div class="section-header">
+                    <h2>Course Discovery</h2>
+                    <p>Customize how you find and see educational content.</p>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="toggle-card">
+                        <div>
+                            <span style="font-weight: 600; display: block; font-size: 0.95rem;">Global Discovery Mode</span>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Ignore regional filters and show all international courses.</span>
+                        </div>
+                        <form action="/auth/toggle-global" method="POST">
+                            <button type="submit" class="btn-toggle <%= user.view_global_always ? 'btn-on' : 'btn-off' %>">
+                                <%= user.view_global_always ? 'ENABLED' : 'DISABLED' %>
+                            </button>
+                        </form>
                     </div>
-                    <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" name="email" value="<%= user.email %>" required>
-                    </div>
-                    <button type="submit" class="btn-save">Update Settings</button>
-                </form>
+
+                    <form action="/auth/update-country" method="POST">
+                        <div class="form-row">
+                            <div class="label-box">
+                                <label>Primary Region</label>
+                                <p>Used to show local exams like JEE or A-Levels.</p>
+                            </div>
+                            <div>
+                                <select name="country">
+                                    <option value="IN" <%= user.country === 'IN' ? 'selected' : '' %>>🇮🇳 India (JEE/NEET/CBSE)</option>
+                                    <option value="GB" <%= user.country === 'GB' ? 'selected' : '' %>>🇬🇧 United Kingdom (A-Levels/GCSE)</option>
+                                    <option value="US" <%= user.country === 'US' ? 'selected' : '' %>>🇺🇸 United States (SAT/AP)</option>
+                                    <option value="GLOBAL" <%= user.country === 'GLOBAL' ? 'selected' : '' %>>🌍 International (Global Standards)</option>
+                                </select>
+                                <button type="submit" class="btn-save" style="margin-top: 1.5rem;">Update Region</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
 
-            <div id="security" class="white-card">
-                <h2 class="section-title">Change Password</h2>
-                <form action="/user/settings/password" method="POST">
-                    <div class="form-group">
-                        <label>Current Password</label>
-                        <input type="password" name="current_password" placeholder="••••••••" required>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="form-group">
-                            <label>New Password</label>
-                            <input type="password" name="new_password" placeholder="Min. 6 chars" required>
+            <div id="account" class="settings-section">
+                <div class="section-header">
+                    <h2>Account Profile</h2>
+                    <p>Basic information used throughout the platform.</p>
+                </div>
+                <div class="section-content">
+                    <form action="/user/settings/update" method="POST">
+                        <div class="form-row">
+                            <div class="label-box"><label>Username</label></div>
+                            <input type="text" name="username" value="<%= user.username %>" required>
                         </div>
-                        <div class="form-group">
-                            <label>Confirm New Password</label>
-                            <input type="password" name="confirm_password" placeholder="Confirm" required>
+                        <div class="form-row">
+                            <div class="label-box"><label>Email Address</label></div>
+                            <input type="email" name="email" value="<%= user.email %>" required>
                         </div>
-                    </div>
-                    <button type="submit" class="btn-save" style="background: #e11d48;">Update Password</button>
-                </form>
+                        <div style="text-align: right;">
+                            <button type="submit" class="btn-save">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="security" class="settings-section">
+                <div class="section-header">
+                    <h2>Login & Security</h2>
+                    <p>Manage your password and account protection.</p>
+                </div>
+                <div class="section-content">
+                    <form action="/user/settings/password" method="POST">
+                        <div class="form-row">
+                            <div class="label-box"><label>Current Password</label></div>
+                            <input type="password" name="current_password" placeholder="••••••••" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="label-box"><label>New Password</label></div>
+                            <input type="password" name="new_password" placeholder="At least 6 characters" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="label-box"><label>Confirm Password</label></div>
+                            <input type="password" name="confirm_password" placeholder="Repeat new password" required>
+                        </div>
+                        <div style="text-align: right;">
+                            <button type="submit" class="btn-save" style="background: var(--danger);">Change Password</button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
         </section>

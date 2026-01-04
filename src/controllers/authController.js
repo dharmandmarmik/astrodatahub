@@ -1,9 +1,12 @@
 // src/controllers/authController.js
-const bcrypt = require('bcryptjs'); 
-const { get, run } = require('../config/database'); 
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const axios = require('axios'); 
+const { get, run } = require('../config/database');
+const { sendOTP } = require('../config/mailer');
 
 /**
- * HELPER: Send Internal Notification (Transmission)
+ * HELPER: Send Internal Notification
  */
 async function sendNotification(userId, type, title, message) {
     try {
@@ -30,75 +33,152 @@ exports.getLogin = (req, res) => {
 // 2. Handle Registration
 exports.register = async (req, res) => {
     const { username, email, password } = req.body;
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const result = await run(
-            'INSERT INTO Users (username, email, password_hash, role) VALUES (?, ?, ?, ?)',
-            [username, email, hashedPassword, 'user']
-        );
-        
-        // TRIGGER: Welcome Transmission
-        await sendNotification(result.id, 'welcome', 'Welcome to the Hub', `Welcome explorer ${username}! Your credentials have been authorized.`);
 
-        req.session.success = 'Registration successful! Access granted.';
-        res.redirect('/auth/login');
-    } catch (error) {
-        let errorMessage = 'Registration failed.';
-        if (error.message && error.message.includes('UNIQUE constraint failed')) { 
-             errorMessage = 'Identity already exists (Username/Email taken).';
+    try {
+        const existing = await get('SELECT id FROM Users WHERE email = ? OR username = ?', [email, username]);
+        if (existing) {
+            return res.render('auth/register', { error: 'Username or Email already registered.', success: null });
         }
-        res.render('auth/register', { error: errorMessage, success: null });
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const otp = crypto.randomInt(100000, 999999).toString();
+        const expires = new Date(Date.now() + 15 * 60000).toISOString();
+
+        await run(
+            'INSERT INTO Users (username, email, password_hash, role, country, otp_code, otp_expires, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [username, email, hashedPassword, 'user', null, otp, expires, 0]
+        );
+
+        await sendOTP(email, otp);
+        req.session.verifyEmail = email;
+        res.redirect('/auth/verify');
+
+    } catch (error) {
+        console.error("REGISTRATION_ERROR:", error);
+        res.render('auth/register', { error: 'Server error during registration.', success: null });
     }
 };
 
-// 3. Login Logic (Consolidated with Advanced Security Notifications)
+// 3. Consolidated Login
 exports.consolidatedLogin = async (req, res) => {
     const { username, password } = req.body;
 
-    // Capture Security Details
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'Unknown IP';
-    const userAgent = req.headers['user-agent'] || 'Unknown Device';
-    
-    // Simple device parsing (can be expanded)
-    let device = "Desktop/Unknown";
-    if (userAgent.includes('Mobi')) device = "Mobile Device";
-    if (userAgent.includes('Tablet')) device = "Tablet";
-
-    // Hardcoded Admin Bypass for safety
-    if (username === 'admin' && password === 'admin123') {
-        req.session.user = { id: 1, username: 'admin', role: 'admin' };
-        await sendNotification(1, 'security', 'Root Access Detected', `Admin login authorized from IP: ${ip} on ${device}.`);
-        return res.redirect('/admin/dashboard');
-    }
-
     try {
-        const user = await get('SELECT * FROM Users WHERE username = ?', [username]);
+        const user = await get('SELECT * FROM Users WHERE username = ? OR email = ?', [username, username]);
+        
         if (user) {
             const match = await bcrypt.compare(password, user.password_hash);
             if (match) {
-                req.session.user = { id: user.id, username: user.username, role: user.role };
+                if (user.role === 'admin') {
+                    req.session.user = { id: user.id, username: user.username, role: user.role };
+                    return res.redirect('/admin/dashboard');
+                }
 
-                // TRIGGER: Detailed Security Notification
-                const securityMsg = `New login detected.\nDevice: ${device}\nIP: ${ip}\nAgent: ${userAgent.substring(0, 50)}...`;
-                await sendNotification(user.id, 'security', 'Security Alert: Login', securityMsg);
+                if (user.is_verified === 0) {
+                    req.session.verifyEmail = user.email;
+                    return res.render('auth/login', { error: 'Account not verified.', success: null });
+                }
 
-                return user.role === 'admin' ? res.redirect('/admin/dashboard') : res.redirect('/');
+                req.session.user = { 
+                    id: user.id, 
+                    username: user.username, 
+                    role: user.role,
+                    country: user.country,
+                    view_global_always: user.view_global_always
+                };
+
+                if (!user.country) {
+                    return res.redirect('/auth/select-country');
+                }
+
+                return res.redirect('/');
             }
         }
-    } catch (error) {
-        console.error('Auth Error:', error);
-    }
-
+    } catch (error) { console.error('Auth Error:', error); }
     res.render('auth/login', { error: 'Invalid Identity or Access Key.', success: null });
 };
 
-// 4. Logout Logic
-exports.logout = (req, res) => {
-    req.session.destroy(err => {
-        if (err) {
-            console.error("Session Destruction Error:", err);
-            return res.redirect('/');
+// 4. NEW: Render Country Selection Page
+exports.getSelectCountry = (req, res) => {
+    if (!req.session.user) return res.redirect('/auth/login');
+    res.render('auth/select-country', { 
+        title: 'Complete Your Profile',
+        user: req.session.user 
+    });
+};
+
+// 5. NEW: Handle Country Selection
+exports.updateCountry = async (req, res) => {
+    const { country } = req.body;
+    if(!req.session.user) return res.redirect('/auth/login');
+    const userId = req.session.user.id;
+
+    try {
+        await run('UPDATE Users SET country = ? WHERE id = ?', [country, userId]);
+        req.session.user.country = country;
+        req.session.success = `Profile updated! Showing courses for ${country}.`;
+        res.redirect('/courses');
+    } catch (err) {
+        res.redirect('/auth/select-country');
+    }
+};
+
+// 6. NEW: Toggle Global Courses
+exports.toggleGlobalView = async (req, res) => {
+    if (!req.session.user) return res.redirect('/auth/login');
+
+    const userId = req.session.user.id;
+    const newVal = req.session.user.view_global_always === 1 ? 0 : 1;
+
+    try {
+        await run('UPDATE Users SET view_global_always = ? WHERE id = ?', [newVal, userId]);
+        req.session.user.view_global_always = newVal;
+        res.redirect('back');
+    } catch (err) {
+        res.status(500).send("Error updating preference.");
+    }
+};
+
+// 7. Verify OTP
+exports.verifyOTP = async (req, res) => {
+    const { otp } = req.body;
+    const email = req.session.verifyEmail;
+
+    try {
+        const user = await get('SELECT * FROM Users WHERE email = ?', [email]);
+        if (user && user.otp_code === otp && new Date() < new Date(user.otp_expires)) {
+            await run('UPDATE Users SET is_verified = 1, otp_code = NULL, otp_expires = NULL WHERE id = ?', [user.id]);
+            
+            req.session.user = { id: user.id, username: user.username, role: user.role, country: user.country };
+            delete req.session.verifyEmail;
+            
+            if (!user.country) return res.redirect('/auth/select-country');
+            res.redirect('/');
+        } else {
+            res.render('auth/verify', { error: 'Invalid code.', email, success: null });
         }
+    } catch (err) { res.redirect('/auth/login'); }
+};
+
+// 8. ADDED: Resend OTP (Missing in your previous snippet)
+exports.resendOTP = async (req, res) => {
+    const email = req.session.verifyEmail;
+    if (!email) return res.redirect('/auth/register');
+
+    try {
+        const otp = crypto.randomInt(100000, 999999).toString();
+        const expires = new Date(Date.now() + 15 * 60000).toISOString();
+        await run('UPDATE Users SET otp_code = ?, otp_expires = ? WHERE email = ?', [otp, expires, email]);
+        await sendOTP(email, otp);
+        res.render('auth/verify', { success: 'New code sent!', email, error: null });
+    } catch (err) {
+        res.render('auth/verify', { error: 'Failed to resend code.', email, success: null });
+    }
+};
+
+// 9. Logout
+exports.logout = (req, res) => {
+    req.session.destroy(() => {
         res.clearCookie('connect.sid'); 
         res.redirect('/');
     });

@@ -1,4 +1,4 @@
-// src/controllers/adminController.js - COMPLETE CONSOLIDATED FILE
+// src/controllers/adminController.js - UPDATED FOR ISO COUNTRY TARGETING
 
 const { run, all, get } = require('../config/database');
 const bcrypt = require('bcryptjs'); 
@@ -37,7 +37,7 @@ exports.getDashboard = async (req, res) => {
     }
 };
 
-// --- 2. DAILY DISCOVERY (FUN FACT) MANAGEMENT ---
+// --- 2. DAILY DISCOVERY MANAGEMENT ---
 
 exports.getFactManager = async (req, res) => {
     try {
@@ -60,12 +60,10 @@ exports.getFactManager = async (req, res) => {
 
 exports.updateFact = async (req, res) => {
     const { factText } = req.body;
-    
     if (!factText) {
         req.session.error = "Fact content cannot be empty.";
         return res.redirect('/admin/manage-fact');
     }
-
     try {
         await run('UPDATE DailyBriefing SET content = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1', [factText]);
         req.session.success = "Daily Discovery fact updated successfully!";
@@ -81,8 +79,7 @@ exports.updateFact = async (req, res) => {
 
 exports.getUsers = async (req, res) => {
     try {
-        const users = await all('SELECT id, username, email, role FROM Users ORDER BY id DESC');
-        
+        const users = await all('SELECT id, username, email, role, country FROM Users ORDER BY id DESC');
         res.render('admin/manage-users', { 
             title: 'Manage Users', 
             adminUser: req.session.user, 
@@ -116,23 +113,23 @@ exports.updateUserRole = async (req, res) => {
 };
 
 exports.deleteUser = async (req, res) => {
-    const { userId } = req.body;
+    const userId = req.params.id; 
     try {
-        if (parseInt(userId) === req.session.user.id) {
-             req.session.error = "You cannot delete your own account via the admin panel.";
-        } else {
-            await run('DELETE FROM Users WHERE id = ?', [userId]);
-            req.session.success = 'User deleted successfully.';
+        if (req.session.user && parseInt(userId) === req.session.user.id) {
+             req.session.error = "Operation aborted: You cannot delete your own admin account.";
+             return res.redirect('/admin/manage-users');
         }
+        await run('DELETE FROM Users WHERE id = ?', [userId]);
+        req.session.success = 'User removed from registry successfully.';
         res.redirect('/admin/manage-users');
     } catch (err) {
-        console.error(err);
-        req.session.error = 'Failed to delete user.';
+        console.error("DELETE_USER_ERROR:", err);
+        req.session.error = 'Database error: Failed to purge user.';
         res.redirect('/admin/manage-users');
     }
 };
 
-// --- 4. COURSE MANAGEMENT ---
+// --- 4. COURSE MANAGEMENT (GEOGRAPHIC TARGETING) ---
 
 exports.getManageCourses = async (req, res) => {
     try {
@@ -168,20 +165,21 @@ exports.getCreateCourse = (req, res) => {
 };
 
 exports.createCourse = async (req, res) => {
-    const { title, description, subject, level, standard } = req.body;
+    // PLAN STEP 3: Admin selects country_code (IN, GB, GLOBAL)
+    const { title, description, subject, level, standard, country_code, price_inr, price_usd } = req.body;
     const instructorId = req.session.user.id; 
 
     if (!title || !description || !subject || !level || !standard) {
-        req.session.error = "All course fields including Academic Path are required.";
+        req.session.error = "Basic course information is required.";
         return res.redirect('/admin/create-course');
     }
 
     try {
         await run(
-            'INSERT INTO Courses (title, description, subject, level, standard, instructor_id) VALUES (?, ?, ?, ?, ?, ?)',
-            [title, description, subject, level, standard, instructorId]
+            'INSERT INTO Courses (title, description, subject, level, standard, country_code, price_inr, price_usd, instructor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [title, description, subject, level, standard, country_code || 'GLOBAL', price_inr || 0, price_usd || 0, instructorId]
         );
-        req.session.success = `Course "${title}" created successfully.`;
+        req.session.success = `Course "${title}" deployed to region: ${country_code}.`;
         res.redirect('/admin/manage-courses'); 
     } catch (err) {
         console.error(err);
@@ -198,7 +196,6 @@ exports.getEditCourse = async (req, res) => {
             req.session.error = 'Course not found.';
             return res.redirect('/admin/dashboard');
         }
-        
         const moduleCountResult = await get('SELECT COUNT(*) AS count FROM CourseModules WHERE course_id = ?', [courseId]);
 
         res.render('admin/edit-course', {
@@ -219,23 +216,23 @@ exports.getEditCourse = async (req, res) => {
 
 exports.editCourse = async (req, res) => {
     const courseId = req.params.id;
-    const { title, description, subject, level, standard } = req.body;
+    const { title, description, subject, level, standard, country_code, price_inr, price_usd } = req.body;
 
     if (!title || !description || !subject || !level || !standard) {
-        req.session.error = "All course fields are required.";
+        req.session.error = "All mandatory fields must be filled.";
         return res.redirect(`/admin/edit-course/${courseId}`);
     }
 
     try {
         await run(
-            'UPDATE Courses SET title = ?, description = ?, subject = ?, level = ?, standard = ? WHERE id = ?',
-            [title, description, subject, level, standard, courseId]
+            'UPDATE Courses SET title = ?, description = ?, subject = ?, level = ?, standard = ?, country_code = ?, price_inr = ?, price_usd = ? WHERE id = ?',
+            [title, description, subject, level, standard, country_code || 'GLOBAL', price_inr || 0, price_usd || 0, courseId]
         );
         req.session.success = `Course "${title}" updated successfully.`;
         res.redirect('/admin/manage-courses'); 
     } catch (err) {
         console.error(err);
-        req.session.error = 'Failed to update course.';
+        req.session.error = 'Failed to update course registry.';
         res.redirect(`/admin/edit-course/${courseId}`);
     }
 };
@@ -244,7 +241,7 @@ exports.deleteCourse = async (req, res) => {
     const courseId = req.params.id;
     try {
         await run('DELETE FROM Courses WHERE id = ?', [courseId]);
-        req.session.success = 'Course deleted successfully.';
+        req.session.success = 'Course purged from system.';
         res.redirect('/admin/manage-courses'); 
     } catch (err) {
         console.error(err);
@@ -259,13 +256,9 @@ exports.getCourseDetailsAdmin = async (req, res) => {
     const courseId = req.params.courseId;
     try {
         const course = await get('SELECT * FROM Courses WHERE id = ?', [courseId]);
-        if (!course) {
-            return res.status(404).render('error', { title: 'Not Found', message: 'Course not found' });
-        }
+        if (!course) return res.status(404).render('error', { title: 'Not Found', message: 'Course not found' });
         
         const modules = await all('SELECT * FROM CourseModules WHERE course_id = ? ORDER BY module_order ASC', [courseId]);
-        
-        // NEW: Check for quizzes for each module to show status in UI
         for (let mod of modules) {
             const quiz = await get('SELECT id FROM Quizzes WHERE module_id = ?', [mod.id]);
             mod.hasQuiz = !!quiz;
@@ -273,7 +266,7 @@ exports.getCourseDetailsAdmin = async (req, res) => {
         }
         
         res.render('admin/manage-modules', {
-            title: `Manage: ${course.title}`,
+            title: `Manage Modules: ${course.title}`,
             adminUser: req.session.user, 
             course: course,
             modules: modules,
@@ -297,7 +290,7 @@ exports.getCreateModule = async (req, res) => {
             return res.redirect('/admin/dashboard');
         }
         res.render('admin/create-module', { 
-            title: `Create Module for ${course.title}`,
+            title: `Add Module to ${course.title}`,
             adminUser: req.session.user, 
             courseTitle: course.title,
             courseId: courseId,
@@ -315,8 +308,8 @@ exports.createModule = async (req, res) => {
     const { title, description, module_number, video_url } = req.body;
     
     if (!title || !description || !module_number) {
-        req.session.error = 'Title, Description, and Order are required.';
-        return res.redirect(`/admin/course/${courseId}`);
+        req.session.error = 'Module Title, Description, and Order are required.';
+        return res.redirect(`/admin/course/${courseId}/create-module`);
     }
 
     try {
@@ -324,8 +317,7 @@ exports.createModule = async (req, res) => {
             'INSERT INTO CourseModules (course_id, module_title, module_content, module_order, video_url) VALUES (?, ?, ?, ?, ?)',
             [courseId, title, description, module_number, video_url]
         );
-        
-        req.session.success = `Module "${title}" created successfully!`;
+        req.session.success = `Module "${title}" attached to mission.`;
         res.redirect(`/admin/course/${courseId}`);
     } catch (err) {
         console.error(err);
@@ -338,7 +330,7 @@ exports.deleteModule = async (req, res) => {
     const { courseId, moduleId } = req.params;
     try {
         await run('DELETE FROM CourseModules WHERE id = ?', [moduleId]);
-        req.session.success = 'Module deleted successfully.';
+        req.session.success = 'Module removed.';
         res.redirect(`/admin/course/${courseId}`);
     } catch (err) {
         console.error(err);
@@ -353,11 +345,7 @@ exports.getAddQuiz = async (req, res) => {
     const { moduleId } = req.params;
     try {
         const module = await get('SELECT * FROM CourseModules WHERE id = ?', [moduleId]);
-        if (!module) {
-            return res.status(404).send("Module not found");
-        }
-        
-        // Check if quiz already exists to prevent duplicates
+        if (!module) return res.status(404).send("Module not found");
         const existingQuiz = await get('SELECT * FROM Quizzes WHERE module_id = ?', [moduleId]);
 
         res.render('admin/add_quiz', { 
@@ -380,74 +368,53 @@ exports.postAddQuiz = async (req, res) => {
     const { quiz_title, questions } = req.body; 
 
     try {
-        // 1. Create the Quiz Header
-        const quizResult = await run(
-            'INSERT INTO Quizzes (module_id, quiz_title) VALUES (?, ?)',
-            [moduleId, quiz_title]
-        );
+        const quizResult = await run('INSERT INTO Quizzes (module_id, quiz_title) VALUES (?, ?)', [moduleId, quiz_title]);
         const quizId = quizResult.id;
 
-        // 2. Insert the Questions (Matching the JSON blueprint)
         if (questions && Array.isArray(questions)) {
             for (const q of questions) {
-                // Ensure options is an array before stringifying
                 const optionsArray = Array.isArray(q.options) ? q.options : [q.opt1, q.opt2, q.opt3, q.opt4];
                 const optionsJson = JSON.stringify(optionsArray);
                 const correctIdx = parseInt(q.correct) || 0;
                 
                 await run(`
-                    INSERT INTO Questions 
-                    (quiz_id, question_text, options_json, correct_index) 
+                    INSERT INTO Questions (quiz_id, question_text, options_json, correct_index) 
                     VALUES (?, ?, ?, ?)`,
                     [quizId, q.text, optionsJson, correctIdx]
                 );
             }
         }
-
         req.session.success = "Quiz deployed successfully!";
         res.redirect(`/admin/course/${(await get('SELECT course_id FROM CourseModules WHERE id = ?', [moduleId])).course_id}`);
     } catch (err) {
         console.error("QUIZ_SAVE_ERROR:", err.message);
-        req.session.error = "Failed to save quiz: " + err.message;
+        req.session.error = "Failed to save quiz.";
         res.redirect(`/admin/modules/${moduleId}/add-quiz`);
     }
 };
-// GET: Render the edit page
+
 exports.getEditQuiz = async (req, res) => {
     const { quizId } = req.params;
     try {
         const quiz = await get('SELECT * FROM Quizzes WHERE id = ?', [quizId]);
         const questions = await all('SELECT * FROM Questions WHERE quiz_id = ?', [quizId]);
-
         const parsedQuestions = questions.map(q => ({
             ...q,
             options: JSON.parse(q.options_json || '[]')
         }));
-
-        res.render('admin/edit-quiz', {
-            title: 'Edit Mission',
-            quiz,
-            questions: parsedQuestions
-        });
+        res.render('admin/edit-quiz', { title: 'Edit Mission', quiz, questions: parsedQuestions });
     } catch (err) {
         console.error(err);
         res.status(500).send("Error fetching quiz data.");
     }
 };
 
-// POST: Process the updates
 exports.postEditQuiz = async (req, res) => {
     const { quizId } = req.params;
     const { quiz_title, questions } = req.body;
-
     try {
-        // 1. Update Quiz Title
         await run('UPDATE Quizzes SET quiz_title = ? WHERE id = ?', [quiz_title, quizId]);
-
-        // 2. Clear old questions (Simplest way to sync)
         await run('DELETE FROM Questions WHERE quiz_id = ?', [quizId]);
-
-        // 3. Re-insert updated questions
         for (const q of questions) {
             const optionsJson = JSON.stringify(q.options);
             await run(
@@ -455,7 +422,6 @@ exports.postEditQuiz = async (req, res) => {
                 [quizId, q.question_text, optionsJson, q.correct_index]
             );
         }
-
         res.redirect('/admin/dashboard?success=QuizUpdated');
     } catch (err) {
         console.error(err);
@@ -466,8 +432,5 @@ exports.postEditQuiz = async (req, res) => {
 // --- 7. ANALYTICS ---
 
 exports.getAnalytics = (req, res) => {
-    res.render('admin/analytics', {
-        title: 'Site Analytics',
-        adminUser: req.session.user,
-    });
+    res.render('admin/analytics', { title: 'Site Analytics', adminUser: req.session.user });
 };
