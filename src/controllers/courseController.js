@@ -163,44 +163,78 @@ exports.getTakeQuiz = async (req, res) => {
         res.status(500).render('error', { message: 'Failed to load quiz.' });
     }
 };
-
 exports.submitQuiz = async (req, res) => {
     const { quizId } = req.params;
     const user = req.session.user;
-    let userAnswers = req.body.answers || [];
-    if (!Array.isArray(userAnswers)) userAnswers = [userAnswers];
+    const timeTakenSeconds = req.body.preciseDuration ? parseFloat(req.body.preciseDuration) : 0;
 
     try {
-        const quiz = await get('SELECT * FROM Quizzes WHERE id = ?', [quizId]);
+        const quizData = await get(`
+            SELECT q.*, m.course_id, m.id as module_id 
+            FROM Quizzes q 
+            JOIN CourseModules m ON q.module_id = m.id 
+            WHERE q.id = ?`, [quizId]);
+
         const questions = await all('SELECT * FROM Questions WHERE quiz_id = ?', [quizId]);
 
+        // --- PAYLOAD PARSING ---
+        let submittedAnswers = {};
+        try {
+            submittedAnswers = JSON.parse(req.body.quizPayload || '{}');
+        } catch (e) {
+            console.error("PAYLOAD_PARSE_FAILURE:", e);
+        }
+
         let score = 0;
-        const review = questions.map((q, i) => {
+        const review = questions.map((q) => {
             const options = JSON.parse(q.options_json || '[]');
-            const userChoiceIndex = userAnswers[i] !== undefined ? parseInt(userAnswers[i]) : null;
-            const isCorrect = userChoiceIndex === q.correct_index;
+            
+            // Match the answer text from our JSON payload using question text as key
+            const userChoice = submittedAnswers[q.question_text];
+            const correctAnswer = options[q.correct_index];
+
+            const isCorrect = userChoice && 
+                             userChoice.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+            
             if (isCorrect) score++;
 
             return {
                 question: q.question_text,
-                options,
-                userChoice: userChoiceIndex !== null ? options[userChoiceIndex] : "No answer",
-                correctAnswer: options[q.correct_index],
-                isCorrect
+                userChoice: userChoice || "NOT_RECEIVED",
+                correctAnswer: correctAnswer,
+                isCorrect: isCorrect
             };
         });
 
+        const percentage = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
+
+        if (user) {
+            await run(`INSERT INTO Completions (user_id, module_id, score_percentage, time_taken_seconds) 
+                       VALUES (?, ?, ?, ?) 
+                       ON CONFLICT(user_id, module_id) DO UPDATE SET 
+                       time_taken_seconds = CASE 
+                            WHEN excluded.score_percentage > score_percentage THEN excluded.time_taken_seconds
+                            WHEN excluded.score_percentage = score_percentage AND excluded.time_taken_seconds < time_taken_seconds THEN excluded.time_taken_seconds
+                            ELSE time_taken_seconds 
+                       END,
+                       score_percentage = MAX(score_percentage, excluded.score_percentage)`, 
+                       [user.id, quizData.module_id, percentage, timeTakenSeconds]);
+        }
+
+        const leaderboard = await all(`SELECT user_id, score_percentage, time_taken_seconds FROM Completions WHERE module_id = ? ORDER BY score_percentage DESC, time_taken_seconds ASC`, [quizData.module_id]);
+        
         res.render('courses/quiz-result', {
-            title: 'Results',
-            score,
-            total: questions.length,
-            percentage: Math.round((score / questions.length) * 100),
-            quiz,
-            review,
-            user: user
+            title: 'Mission Debrief',
+            score, total: questions.length, percentage, timeTaken: timeTakenSeconds,
+            rank: leaderboard.findIndex(e => e.user_id === user.id) + 1,
+            totalExaminees: leaderboard.length,
+            quiz: quizData, courseId: quizData.course_id,
+            review, user
         });
+
     } catch (err) {
-        res.status(500).render('error', { message: 'Submission failed.' });
+        console.error("QUIZ_SUBMIT_SYSTEM_ERROR:", err);
+        res.status(500).send("A system error occurred during data transmission.");
     }
 };
 

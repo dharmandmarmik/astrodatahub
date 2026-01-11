@@ -70,7 +70,7 @@ function all(sql, params = []) {
  * Safe Migration Logic: Adds missing columns to existing databases
  */
 function applySafeMigrations() {
-    // 1. Check User Table columns (UPDATED FOR STEP 2)
+    // 1. Check User Table columns
     db.all("PRAGMA table_info(Users)", (err, columns) => {
         if (err) return;
         const columnNames = columns.map(c => c.name);
@@ -83,8 +83,6 @@ function applySafeMigrations() {
             if (!columnNames.includes('role')) db.run("ALTER TABLE Users ADD COLUMN role TEXT DEFAULT 'user'");
             if (!columnNames.includes('level')) db.run("ALTER TABLE Users ADD COLUMN level INTEGER DEFAULT 1");
             if (!columnNames.includes('xp')) db.run("ALTER TABLE Users ADD COLUMN xp INTEGER DEFAULT 0");
-            
-            // LOGIC FOR STEP 2: Handle country choice and global toggle
             if (!columnNames.includes('country')) db.run("ALTER TABLE Users ADD COLUMN country TEXT"); 
             if (!columnNames.includes('view_global_always')) db.run("ALTER TABLE Users ADD COLUMN view_global_always INTEGER DEFAULT 0");
         });
@@ -99,13 +97,26 @@ function applySafeMigrations() {
             if (!columnNames.includes('badge_icon')) db.run("ALTER TABLE Courses ADD COLUMN badge_icon TEXT DEFAULT '🌟'");
             if (!columnNames.includes('price_inr')) db.run("ALTER TABLE Courses ADD COLUMN price_inr INTEGER DEFAULT 0");
             if (!columnNames.includes('price_usd')) db.run("ALTER TABLE Courses ADD COLUMN price_usd INTEGER DEFAULT 0");
-            if (!columnNames.includes('country_code')) {
-                db.run("ALTER TABLE Courses ADD COLUMN country_code TEXT DEFAULT 'GLOBAL'");
+            if (!columnNames.includes('country_code')) db.run("ALTER TABLE Courses ADD COLUMN country_code TEXT DEFAULT 'GLOBAL'");
+        });
+    });
+
+    // 3. Completions Table Migration (UPDATED FOR HIGH-PRECISION TIME)
+    db.all("PRAGMA table_info(Completions)", (err, columns) => {
+        if (err) return;
+        const columnNames = columns.map(c => c.name);
+        db.serialize(() => {
+            if (!columnNames.includes('score_percentage')) {
+                db.run("ALTER TABLE Completions ADD COLUMN score_percentage INTEGER DEFAULT 0");
+            }
+            // Using REAL ensures SQLite handles floating point decimals for 0.0001s accuracy
+            if (!columnNames.includes('time_taken_seconds')) {
+                db.run("ALTER TABLE Completions ADD COLUMN time_taken_seconds REAL DEFAULT 0.0");
             }
         });
     });
 
-    // 3. Questions Table Migration
+    // 4. Questions Table Migration
     db.all("PRAGMA table_info(Questions)", (err, columns) => {
         if (err) return;
         const columnNames = columns.map(c => c.name);
@@ -121,8 +132,7 @@ function applySafeMigrations() {
  */
 function createTables() {
     db.serialize(() => {
-        // 1. Users Table (Updated for Step 2)
-        // Note: country is null by default so we can detect if a user has set it yet.
+        // 1. Users Table
         db.run(`CREATE TABLE IF NOT EXISTS Users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
@@ -181,11 +191,13 @@ function createTables() {
             FOREIGN KEY (course_id) REFERENCES Courses(id) ON DELETE CASCADE
         )`);
 
-        // 5. Completions Table
+        // 5. Completions Table (UPDATED FOR RANKING PRECISION)
         db.run(`CREATE TABLE IF NOT EXISTS Completions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             module_id INTEGER NOT NULL,
+            score_percentage INTEGER DEFAULT 0,
+            time_taken_seconds REAL DEFAULT 0.0,
             completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(user_id, module_id),
             FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,

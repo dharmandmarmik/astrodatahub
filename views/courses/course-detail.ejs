@@ -3,167 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= course.title %> | AstroDataHub</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title><%= course.title %> | Mission Path</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        .price-container {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 1.25rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--border);
-        }
-        .price-label { font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
-        .price-value { font-size: 1.75rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 6px; }
-        .original-price { font-size: 0.9rem; text-decoration: line-through; color: #94a3b8; font-weight: 500; }
-        .currency-badge { font-size: 0.65rem; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 4px; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: #f8fafc; }
+        
+        /* The Adventure Path SVG */
+        .road-svg { position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 0; pointer-events: none; }
+        .path-line { stroke-dasharray: 12; animation: dash-flow 3s linear infinite; }
+        @keyframes dash-flow { to { stroke-dashoffset: -24; } }
+
+        /* Floating UI */
+        .glass-ui { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .node-active { filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5)); border-color: #3b82f6 !important; }
+        .node-complete { filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.5)); border-color: #10b981 !important; background: #064e3b !important; }
+        
+        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.3s ease; }
+        .btn-primary:hover { box-shadow: 0 0 30px rgba(37, 99, 235, 0.6); transform: translateY(-2px); }
     </style>
 </head>
-<body style="background-color: var(--bg-body);">
+<body class="antialiased overflow-x-hidden">
 
     <%- include('../partials/header') %>
 
-    <main class="container" style="padding: 4rem 20px;">
-        
-        <nav style="margin-bottom: 2rem;">
-            <a href="/courses" style="font-size: 0.85rem; color: var(--primary); font-weight: 600; text-decoration: none;">← Back to Catalog</a>
-        </nav>
-
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 3rem; align-items: start;">
-            
-            <div>
-                <header style="margin-bottom: 3rem;">
-                    <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
-                        <span style="background: #eff6ff; color: var(--primary); padding: 4px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
-                            <%= course.subject %>
-                        </span>
-                        <span style="background: #f8fafc; border: 1px solid var(--border); color: var(--text-muted); padding: 4px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
-                            Level: <%= course.level %>
-                        </span>
-                        <span style="background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; padding: 4px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
-                            <%= course.region %> Track
-                        </span>
-                    </div>
-                    <h1 style="font-size: 2.5rem; line-height: 1.2; margin-bottom: 1.5rem;"><%= course.title %></h1>
-                    
-                    <div style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.7;">
-                        <%- course.description %>
-                    </div>
-                </header>
-
-                <section>
-                    <h2 style="font-size: 1.5rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 0.75rem;">Curriculum Modules</h2>
-                    
-                    <% if (modules && modules.length > 0) { %>
-                        <div style="display: flex; flex-direction: column; gap: 1rem;">
-                            <% modules.forEach((module, index) => { %>
-                                <div class="auth-card" style="margin-bottom: 0; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; border-radius: 10px;">
-                                    <div style="display: flex; align-items: center; gap: 1.5rem;">
-                                        <span style="font-size: 1.25rem; font-weight: 800; color: #e2e8f0;"><%= String(index + 1).padStart(2, '0') %></span>
-                                        <div>
-                                            <h4 style="margin: 0; font-size: 1rem; color: var(--text-main);"><%= module.module_title %></h4>
-                                            <span style="font-size: 0.75rem; color: var(--text-muted);">Research Content Unit</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div style="display: flex; align-items: center; gap: 1rem;">
-                                        <% if (user && isEnrolled) { %>
-                                            <% if (module.quiz) { %>
-                                                <a href="/courses/quiz/<%= module.quiz.id %>" 
-                                                   style="font-size: 0.75rem; font-weight: 700; background: var(--primary); color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px;">
-                                                    Take Quiz
-                                                </a>
-                                            <% } %>
-
-                                            <a href="/courses/course/<%= course.id %>/module/<%= module.id %>" style="font-size: 0.85rem; font-weight: 600; color: var(--primary); text-decoration: none;">View Module →</a>
-                                        <% } else if (user && !isEnrolled) { %>
-                                            <span style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">Enroll to Unlock</span>
-                                        <% } %>
-                                    </div>
-                                </div>
-                            <% }) %>
-                        </div>
-                    <% } else { %>
-                        <div style="padding: 2rem; background: #fff; border: 1px dashed var(--border); border-radius: 12px; text-align: center;">
-                            <p style="color: var(--text-muted);">Modules for this mission are currently being encrypted. Check back soon.</p>
-                        </div>
-                    <% } %>
-                </section>
+    <header class="pt-40 pb-12 px-6 relative z-10">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 mb-8">
+                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Sector: <%= course.subject %></span>
             </div>
+            <h1 class="text-5xl md:text-7xl font-black text-white mb-6 tracking-tighter"><%= course.title %></h1>
+            <p class="text-slate-400 font-medium max-w-2xl mx-auto text-lg leading-relaxed"><%- course.description %></p>
+        </div>
+    </header>
 
-            <aside>
-                <div class="auth-card" style="position: sticky; top: 100px; padding: 2rem; border-radius: 16px;">
-                    <h4 style="margin-bottom: 1rem;">Course Status</h4>
+    <main class="relative py-20 min-h-screen">
+        
+        <svg class="road-svg" width="400" height="<%= (modules.length * 300) + 200 %>" viewBox="0 0 400 <%= (modules.length * 300) + 200 %>" fill="none">
+            <path d="M 200 0 
+                <% modules.forEach((_, i) => { 
+                    let x = (i % 2 === 0) ? 300 : 100;
+                    let y = (i + 1) * 300;
+                    let prevY = i * 300;
+                %>
+                C 200 <%= prevY + 150 %>, <%= x %> <%= prevY + 150 %>, <%= x %> <%= y %>
+                S 200 <%= y + 150 %>, 200 <%= y + 300 %>
+                <% }) %>" 
+                stroke="#1e293b" stroke-width="12" stroke-linecap="round"/>
+            
+            <% if (isEnrolled) { %>
+            <path class="path-line" d="M 200 0 
+                <% modules.forEach((_, i) => { 
+                    let x = (i % 2 === 0) ? 300 : 100;
+                    let y = (i + 1) * 300;
+                    let prevY = i * 300;
+                %>
+                C 200 <%= prevY + 150 %>, <%= x %> <%= prevY + 150 %>, <%= x %> <%= y %>
+                S 200 <%= y + 150 %>, 200 <%= y + 300 %>
+                <% }) %>" 
+                stroke="#3b82f6" stroke-width="4" stroke-linecap="round"/>
+            <% } %>
+        </svg>
+
+        <div class="max-w-5xl mx-auto relative z-10">
+            <% if (modules && modules.length > 0) { %>
+                <% modules.forEach((module, index) => { 
+                    const isCompleted = completedModuleIds.includes(module.id);
+                    let side = (index % 2 === 0) ? 'flex-row' : 'flex-row-reverse';
+                    let textAlign = (index % 2 === 0) ? 'text-left ml-10' : 'text-right mr-10';
+                %>
+                <div class="flex items-center <%= side %> justify-center mb-56 w-full">
                     
-                    <div class="price-container">
-                        <span class="price-label">Current Enrollment Fee</span>
-                        <div class="price-value">
-                            <% if (userCountry === 'IN') { %>
-                                ₹<%= (course.price_inr || 0).toLocaleString('en-IN') %>
-                                <span class="currency-badge">INR</span>
-                            <% } else { %>
-                                $<%= (course.price_usd || 0) %>
-                                <span class="currency-badge">USD</span>
-                            <% } %>
-                        </div>
-                        <div style="margin-top: 5px;">
-                            <span class="original-price">
-                                <%= userCountry === 'IN' ? '₹4,999' : '$59' %>
-                            </span>
-                            <span style="font-size: 0.75rem; color: #16a34a; font-weight: 700; margin-left: 8px;">100% OFF</span>
-                        </div>
-                    </div>
-
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-                        Enroll to gain full access to datasets, research modules, and certification of completion.
-                    </p>
-                    
-                    <div style="margin-bottom: 2rem;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.5rem;">
-                            <span style="color: var(--text-muted);">Duration:</span>
-                            <span style="font-weight: 600;">Self-paced</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
-                            <span style="color: var(--text-muted);">Format:</span>
-                            <span style="font-weight: 600;">Digital Terminal</span>
-                        </div>
-                    </div>
-
-                    <% if (user) { %>
-                        <% if (isEnrolled) { %>
-                            <div style="text-align: center;">
-                                <div style="background: #f0fdf4; color: #166534; padding: 10px; border-radius: 8px; margin-bottom: 1rem; font-size: 0.85rem; font-weight: 600;">
-                                    ✓ Mission Active
-                                </div>
-                                <a href="/dashboard" class="btn-primary" style="display: block; text-align: center; text-decoration: none; background: #1e293b; margin-bottom: 2rem;">Go to Dashboard</a>
-                                
-                                <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; text-align: left;">
-                                    <h5 style="color: #dc2626; font-size: 0.8rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Danger Zone</h5>
-                                    <form action="/courses/course/<%= course.id %>/unenroll" method="POST" onsubmit="return confirm('Are you sure you want to unenroll? This will remove this course from your dashboard.');">
-                                        <button type="submit" style="background: transparent; color: #b91c1c; border: 1px solid #fecaca; width: 100%; padding: 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-                                            Unenroll from Course
-                                        </button>
-                                    </form>
-                                </div>
+                    <div class="relative group">
+                        <div class="w-28 h-28 md:w-36 md:h-36 rounded-[2.5rem] rotate-12 glass-ui border-4 flex items-center justify-center transition-all duration-500
+                            <%= isCompleted ? 'node-complete' : (isEnrolled ? 'node-active' : 'opacity-40 border-slate-800') %> group-hover:rotate-0">
+                            
+                            <div class="-rotate-12 group-hover:rotate-0 transition-transform text-center">
+                                <% if (isCompleted) { %>
+                                    <span class="text-4xl">✅</span>
+                                <% } else { %>
+                                    <span class="text-xs font-black text-blue-400 block uppercase">LVL</span>
+                                    <span class="text-4xl md:text-5xl font-black text-white"><%= index + 1 %></span>
+                                <% } %>
                             </div>
-                        <% } else { %>
-                            <form action="/courses/enroll/<%= course.id %>" method="POST">
-                                <button type="submit" class="btn-primary" style="width: 100%;">Enroll for Free</button>
-                            </form>
-                        <% } %>
-                    <% } else { %>
-                        <a href="/auth/login" class="btn-primary" style="display: block; text-align: center; text-decoration: none;">Sign In to Enroll</a>
-                    <% } %>
+                        </div>
+                    </div>
 
-                    <div style="margin-top: 1.5rem; text-align: center;">
-                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">Secure Academic Uplink Guaranteed</span>
+                    <div class="w-[300px] md:w-[450px] <%= textAlign %>">
+                        <div class="glass-ui p-8 rounded-[2.5rem] transition-all hover:scale-105 border-l-4 <%= isCompleted ? 'border-l-emerald-500' : (isEnrolled ? 'border-l-blue-500' : 'border-l-transparent') %>">
+                            <h3 class="text-2xl font-black text-white mb-2"><%= module.module_title %></h3>
+                            <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-6">Unit Objective: Research Phase</p>
+                            
+                            <div class="flex items-center gap-3 <%= (index % 2 === 0) ? 'justify-start' : 'justify-end' %>">
+                                <% if (user && isEnrolled) { %>
+                                    <a href="/courses/course/<%= course.id %>/module/<%= module.id %>" 
+                                       class="px-8 py-3 btn-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em]">
+                                        <%= isCompleted ? 'Revisit Stage' : 'Start Mission' %>
+                                    </a>
+                                    <% if (module.quiz) { %>
+                                        <a href="/courses/quiz/<%= module.quiz.id %>" class="px-4 py-3 bg-emerald-500/10 text-emerald-400 rounded-2xl border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" stroke-width="2"/></svg>
+                                        </a>
+                                    <% } %>
+                                <% } else { %>
+                                    <span class="text-xs font-black text-slate-600 uppercase italic">Mission Locked</span>
+                                <% } %>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </aside>
+                <% }) %>
+            <% } %>
 
+            <div class="flex flex-col items-center py-32 text-center">
+                <div class="w-40 h-40 bg-amber-500/10 rounded-full border-2 border-dashed border-amber-500 flex items-center justify-center text-7xl mb-8 animate-pulse">
+                    🏆
+                </div>
+                <h2 class="text-3xl font-black text-white uppercase tracking-tighter">Final Certification</h2>
+                <p class="text-slate-500 font-bold text-xs uppercase mt-2 tracking-widest">Complete all nodes to unlock the scientific credential</p>
+            </div>
         </div>
     </main>
+
+    <div class="fixed bottom-10 left-0 right-0 z-[100] px-6">
+        <div class="max-w-3xl mx-auto glass-ui rounded-[3rem] p-4 flex items-center justify-between shadow-2xl border-t-2 border-white/10">
+            <div class="flex items-center gap-6 ml-6">
+                <div>
+                    <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest">Learner Progress</p>
+                    <p class="text-sm font-black text-white">
+                        <%= completedModuleIds.length %> / <%= modules.length %> Nodes
+                    </p>
+                </div>
+                <div class="h-8 w-[2px] bg-slate-800"></div>
+                <div>
+                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Mission Status</p>
+                    <p class="text-sm font-black <%= isEnrolled ? 'text-emerald-400' : 'text-slate-400' %>">
+                        <%= isEnrolled ? 'ACTIVE' : 'IDLE' %>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <% if (!user) { %>
+                    <a href="/auth/login" class="px-10 py-5 bg-white text-slate-950 rounded-[2rem] font-black text-[10px] uppercase tracking-widest">Login to Start</a>
+                <% } else if (!isEnrolled) { %>
+                    <form action="/courses/enroll/<%= course.id %>" method="POST">
+                        <button type="submit" class="px-12 py-5 btn-primary text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em]">Initialize Path</button>
+                    </form>
+                <% } else { %>
+                    <a href="/dashboard" class="px-10 py-5 bg-slate-800 text-white rounded-[2rem] font-black text-[10px] uppercase tracking-widest hover:bg-slate-700 transition-all">HQ Dashboard</a>
+                <% } %>
+            </div>
+        </div>
+    </div>
 
     <%- include('../partials/footer') %>
 
